@@ -198,20 +198,16 @@ def show_page3():
     
     products = [
         {
-            'name': '고운오징어젓',
+            'name': '오쉐프 간편 고등어구이',
             'prefix': 'product_1'
         },
         {
-            'name': '화덕에 미치다 500도 고등어구이',
+            'name': '정옥 재첩국',
             'prefix': 'product_2'
         },
         {
-            'name': '오쉐프 간편 고등어구이',
+            'name': '해물동그랑땡조림',
             'prefix': 'product_3'
-        },
-        {
-            'name': '해물동그랑땡 행복한맛남',
-            'prefix': 'product_4'
         }
     ]
     
