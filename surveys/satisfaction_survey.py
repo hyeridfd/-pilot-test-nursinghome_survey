@@ -501,7 +501,7 @@ def show_page4(supabase, elderly_id, surveyor_id, nursing_home_id):
         ]
         
         # 각 제품의 평균 점수 계산
-        for i in range(1, 5):
+        for i in range(1, 4):
             prefix = f"product_{i}"
             scores = [
                 data.get(f"{prefix}_taste", 0),
