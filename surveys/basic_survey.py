@@ -429,13 +429,13 @@ def show_page5_ipaq():
     st.subheader("📊 신체 활동량 요약")
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.metric("격렬한 활동", f"{total_vigorous:.0f} MET-분/주")
+        st.metric("격렬한 활동", f"{total_vigorous:.2f} MET-분/주")
     with col2:
-        st.metric("중간 활동", f"{total_moderate:.0f} MET-분/주")
+        st.metric("중간 활동", f"{total_moderate:.2f} MET-분/주")
     with col3:
-        st.metric("걷기", f"{total_walking:.0f} MET-분/주")
+        st.metric("걷기", f"{total_walking:.2f} MET-분/주")
     with col4:
-        st.metric("총 활동량", f"{total_met:.0f} MET-분/주")
+        st.metric("총 활동량", f"{total_met:.2f} MET-분/주")
     
     # 활동 수준 분류
     if total_met >= 3000 or (vigorous_days >= 3 and total_vigorous >= 1500):
