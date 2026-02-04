@@ -73,7 +73,6 @@ def show_page1():
             min_value=1900,
             max_value=datetime.now().year,
             value=int(data.get('age', 1950)) if data.get('age') else 1950,
-            #value=int(data.get('age', 0)) if data.get('age') else 0,
             step=1,
             key="age"
         )
