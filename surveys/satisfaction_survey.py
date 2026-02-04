@@ -495,10 +495,9 @@ def show_page4(supabase, elderly_id, surveyor_id, nursing_home_id):
         st.markdown("#### 제품 평가")
         
         product_names = [
-            "고운오징어젓",
-            "화덕에 미치다",
-            "오쉐프 고등어",
-            "해물동그랑땡"
+            "오쉐프 간편 고등어구이",
+            "정옥 재첩국",
+            "해물동그랑땡조림"
         ]
         
         # 각 제품의 평균 점수 계산
