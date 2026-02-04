@@ -440,11 +440,11 @@ def show_page5_ipaq():
     
     # 활동 수준 분류
     if total_met >= 3000 or (vigorous_days >= 3 and total_vigorous >= 1500):
-        activity_level = "높음 (High)"
+        activity_level = "높은 신체 활동 (High)"
     elif total_met >= 600 or (vigorous_days >= 3) or (moderate_days + walking_days >= 5 and total_moderate + total_walking >= 600):
-        activity_level = "중간 (Moderate)"
+        activity_level = "중간 수준의 신체 활동 (Moderate)"
     else:
-        activity_level = "낮음 (Low)"
+        activity_level = "낮은 신체 활동 (Low)"
     
     st.info(f"💪 신체 활동 수준: **{activity_level}**")
     
