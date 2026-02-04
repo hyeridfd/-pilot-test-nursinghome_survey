@@ -329,7 +329,7 @@ def show_page5_ipaq():
     data = st.session_state.basic_data
     
     st.markdown("### 1. 격렬한 신체 활동")
-    st.caption("예: 무거운 물건 들기, 땅 파기, 에어로빅, 빠른 자전거 타기 등")
+    st.caption("예: 무거운 물건 들기, 땅 파기, 에어로빅, 빠른 속도로 자전거 타기 등")
     
     col1, col2 = st.columns(2)
     with col1:
@@ -352,7 +352,7 @@ def show_page5_ipaq():
     
     st.markdown("---")
     st.markdown("### 2. 중간 정도의 신체 활동")
-    st.caption("예: 가벼운 물건 나르기, 보통 속도의 자전거 타기, 복식 테니스 등 (걷기는 제외)")
+    st.caption("예: 가벼운 물건 나르기, 보통 속도로 자전거 타기, 복식 테니스 등 (걷기는 제외)")
     
     col1, col2 = st.columns(2)
     with col1:
@@ -400,7 +400,7 @@ def show_page5_ipaq():
     st.markdown("### 4. 앉아서 보낸 시간")
     
     sitting_time = st.number_input(
-        "지난 7일 동안 평일 하루에 앉아서 보낸 시간은 얼마나 됩니까? (분)",
+        "지난 7일 동안 평일 하루에 앉아서 보낸 시간은 얼마나 됩니까? (분) 책상에 앉아 있거나, 친구를 만나거나, 독서할 때 앉거나, 텔레비전을 앉아서 또는 누워서 시청한 시간이 포함",
         min_value=0,
         max_value=1440,
         value=int(data.get('sitting_time', 0)) if data.get('sitting_time') else 0,
