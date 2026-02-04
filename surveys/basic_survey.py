@@ -466,106 +466,151 @@ def show_page6_mna():
     else:
         bmi = None
     
-    st.markdown("### 1. 식욕 감퇴")
+    # === A. 식욕 감퇴 ===
+    st.markdown("### A. 지난 3개월 동안 밥맛이 없거나, 소화가 잘 안되거나, 밥고 삼키는 것이 어려워서 식사량이 줄었습니까?")
+    
+    appetite_options = {
+        "많이 줄었다": 0,
+        "조금 줄었다": 1,
+        "변함 없다": 2
+    }
+    
+    # 기존 값 찾기
+    current_appetite_score = data.get('mna_appetite_change', 2)
+    current_appetite_text = [k for k, v in appetite_options.items() if v == current_appetite_score][0] if current_appetite_score in appetite_options.values() else "변함 없다"
+    
     appetite_change = st.radio(
-        "지난 3개월 동안 식욕부진, 소화 문제, 씹기 또는 삼키기 어려움 등으로 음식 섭취량이 감소했습니까?",
-        options=[
-            "0 = 심하게 감소",
-            "1 = 중등도로 감소",
-            "2 = 감소하지 않음"
-        ],
-        index=int(data.get('mna_appetite_change', 2)),
-        key="mna_appetite_change"
+        "식욕 변화",
+        options=list(appetite_options.keys()),
+        index=list(appetite_options.keys()).index(current_appetite_text),
+        key="mna_appetite_change_radio",
+        label_visibility="collapsed"
     )
+    appetite_score = appetite_options[appetite_change]
     
-    st.markdown("### 2. 체중 감소")
+    # === B. 체중 감소 ===
+    st.markdown("### B. 지난 3개월 동안 몸무게가 줄었습니까?")
+    
+    weight_options = {
+        "3kg 이상 감소": 0,
+        "모르겠다": 1,
+        "1kg~3kg 감소": 2,
+        "변함 없다": 3
+    }
+    
+    current_weight_score = data.get('mna_weight_change', 3)
+    current_weight_text = [k for k, v in weight_options.items() if v == current_weight_score][0] if current_weight_score in weight_options.values() else "변함 없다"
+    
     weight_change = st.radio(
-        "지난 3개월 동안 체중 감소가 있었습니까?",
-        options=[
-            "0 = 3kg 이상 감소",
-            "1 = 모르겠다",
-            "2 = 1-3kg 감소",
-            "3 = 체중 감소 없음"
-        ],
-        index=int(data.get('mna_weight_change', 3)),
-        key="mna_weight_change"
+        "체중 변화",
+        options=list(weight_options.keys()),
+        index=list(weight_options.keys()).index(current_weight_text),
+        key="mna_weight_change_radio",
+        label_visibility="collapsed"
     )
+    weight_score = weight_options[weight_change]
     
-    st.markdown("### 3. 거동")
+    # === C. 거동 능력 ===
+    st.markdown("### C. 거동 능력")
+    
+    mobility_options = {
+        "외출 불가, 침대나 의자에서만 생활 가능": 0,
+        "외출 불가, 집에서만 활동 가능": 1,
+        "외출 가능, 활동 제약 없음": 2
+    }
+    
+    current_mobility_score = data.get('mna_mobility', 2)
+    current_mobility_text = [k for k, v in mobility_options.items() if v == current_mobility_score][0] if current_mobility_score in mobility_options.values() else "외출 가능, 활동 제약 없음"
+    
     mobility = st.radio(
-        "거동 능력은 어떻습니까?",
-        options=[
-            "0 = 침대나 의자에 묶여있음",
-            "1 = 침대나 의자를 벗어날 수 있으나 외출하지 못함",
-            "2 = 자유롭게 돌아다님"
-        ],
-        index=int(data.get('mna_mobility', 2)),
-        key="mna_mobility"
+        "거동 상태",
+        options=list(mobility_options.keys()),
+        index=list(mobility_options.keys()).index(current_mobility_text),
+        key="mna_mobility_radio",
+        label_visibility="collapsed"
     )
+    mobility_score = mobility_options[mobility]
     
-    st.markdown("### 4. 스트레스 또는 급성 질환")
+    # === D. 스트레스 또는 급성 질환 ===
+    st.markdown("### D. 지난 3개월 동안 정신적 스트레스를 경험했거나 급성 질환을 앓았던 적이 있습니까?")
+    
+    stress_options = {
+        "예": 0,
+        "아니오": 2
+    }
+    
+    current_stress_score = data.get('mna_stress_illness', 2)
+    current_stress_text = "아니오" if current_stress_score == 2 else "예"
+    
     stress_illness = st.radio(
-        "지난 3개월 동안 정신적 스트레스 또는 급성 질환을 겪었습니까?",
-        options=[
-            "0 = 예",
-            "2 = 아니오"
-        ],
-        index=0 if data.get('mna_stress_illness') == 0 else 1,
-        key="mna_stress_illness"
+        "스트레스/질환 여부",
+        options=list(stress_options.keys()),
+        index=list(stress_options.keys()).index(current_stress_text),
+        key="mna_stress_radio",
+        label_visibility="collapsed"
     )
+    stress_score = stress_options[stress_illness]
     
-    st.markdown("### 5. 신경정신학적 문제")
+    # === E. 신경정신학적 문제 ===
+    st.markdown("### E. 신경 정신과적 문제")
+    
+    neuro_options = {
+        "중증 치매나 우울증": 0,
+        "경증 치매": 1,
+        "없음": 2
+    }
+    
+    current_neuro_score = data.get('mna_neuropsychological_problem', 2)
+    current_neuro_text = [k for k, v in neuro_options.items() if v == current_neuro_score][0] if current_neuro_score in neuro_options.values() else "없음"
+    
     neuropsychological = st.radio(
-        "신경정신학적 문제가 있습니까?",
-        options=[
-            "0 = 심한 치매 또는 우울증",
-            "1 = 경도 치매",
-            "2 = 정신적 문제 없음"
-        ],
-        index=int(data.get('mna_neuropsychological_problem', 2)),
-        key="mna_neuropsychological"
+        "정신과적 문제",
+        options=list(neuro_options.keys()),
+        index=list(neuro_options.keys()).index(current_neuro_text),
+        key="mna_neuro_radio",
+        label_visibility="collapsed"
     )
+    neuro_score = neuro_options[neuropsychological]
     
-    st.markdown("### 6. 체질량지수 (BMI)")
+    # === F. BMI ===
+    st.markdown("### F. 체질량지수 → kg / (m 높이)?")
     
     if bmi:
         # BMI 자동 분류
         if bmi < 19:
-            bmi_category_default = 0
-            bmi_text = f"0 = BMI가 19 미만 (현재: {bmi:.2f})"
+            bmi_score = 0
+            bmi_text = f"BMI < 19 (현재: {bmi:.2f})"
         elif bmi < 21:
-            bmi_category_default = 1
-            bmi_text = f"1 = BMI가 19 이상 21 미만 (현재: {bmi:.2f})"
+            bmi_score = 1
+            bmi_text = f"19 ≤ BMI < 21 (현재: {bmi:.2f})"
         elif bmi < 23:
-            bmi_category_default = 2
-            bmi_text = f"2 = BMI가 21 이상 23 미만 (현재: {bmi:.2f})"
+            bmi_score = 2
+            bmi_text = f"21 ≤ BMI < 23 (현재: {bmi:.2f})"
         else:
-            bmi_category_default = 3
-            bmi_text = f"3 = BMI가 23 이상 (현재: {bmi:.2f})"
+            bmi_score = 3
+            bmi_text = f"BMI ≥ 23 (현재: {bmi:.2f})"
         
-        st.info(bmi_text)
-        bmi_category = bmi_category_default
+        st.info(f"📊 {bmi_text}")
     else:
-        bmi_category = st.radio(
+        bmi_options_manual = {
+            "BMI < 19": 0,
+            "19 ≤ BMI < 21": 1,
+            "21 ≤ BMI < 23": 2,
+            "BMI ≥ 23": 3
+        }
+        
+        current_bmi_score = data.get('mna_bmi_category', 3)
+        current_bmi_text = [k for k, v in bmi_options_manual.items() if v == current_bmi_score][0] if current_bmi_score in bmi_options_manual.values() else "BMI ≥ 23"
+        
+        bmi_manual = st.radio(
             "BMI 분류",
-            options=[
-                "0 = BMI가 19 미만",
-                "1 = BMI가 19 이상 21 미만",
-                "2 = BMI가 21 이상 23 미만",
-                "3 = BMI가 23 이상"
-            ],
-            index=int(data.get('mna_bmi_category', 3)),
-            key="mna_bmi_category_manual"
+            options=list(bmi_options_manual.keys()),
+            index=list(bmi_options_manual.keys()).index(current_bmi_text),
+            key="mna_bmi_radio"
         )
+        bmi_score = bmi_options_manual[bmi_manual]
     
-    # 점수 계산
-    appetite_score = int(appetite_change.split('=')[0].strip())
-    weight_score = int(weight_change.split('=')[0].strip())
-    mobility_score = int(mobility.split('=')[0].strip())
-    stress_score = int(stress_illness.split('=')[0].strip())
-    neuro_score = int(neuropsychological.split('=')[0].strip())
-    bmi_score = bmi_category if isinstance(bmi_category, int) else int(bmi_category.split('=')[0].strip())
-    
+    # 총점 계산
     total_score = appetite_score + weight_score + mobility_score + stress_score + neuro_score + bmi_score
     
     # 데이터 저장
