@@ -478,7 +478,7 @@ def show_page6_mna():
     
     # 기존 값 찾기
     current_appetite_score = data.get('mna_appetite_change', 2)
-    current_appetite_text = [k for k, v in appetite_options.items() if v == current_appetite_score][0] if current_appetite_score in appetite_options.values() else "변함 없다"
+    current_appetite_text = [k for k, v in appetite_options.items() if v == current_appetite_score][0] if current_appetite_score in appetite_options.values() else "변화 없다"
     
     appetite_change = st.radio(
         "식욕 변화",
@@ -500,7 +500,7 @@ def show_page6_mna():
     }
     
     current_weight_score = data.get('mna_weight_change', 3)
-    current_weight_text = [k for k, v in weight_options.items() if v == current_weight_score][0] if current_weight_score in weight_options.values() else "변함 없다"
+    current_weight_text = [k for k, v in weight_options.items() if v == current_weight_score][0] if current_weight_score in weight_options.values() else "변화 없다"
     
     weight_change = st.radio(
         "체중 변화",
