@@ -1308,7 +1308,10 @@ def save_basic_survey(supabase, elderly_id, surveyor_id, nursing_home_id):
             'mna_stress_illness': 'mna_stress_illness',
             'mna_neuropsychological_problem': 'mna_neuropsychological_problem',
             'mna_bmi_category': 'mna_bmi_category',
-            'mna_score': 'mna_score'
+            'mna_score': 'mna_score',
+            # K-MBI 추가 필드 ✅ 이거 추가!
+            'k_mbi_max_score': 'k_mbi_max_score',
+            'mobility_type': 'mobility_type'
         }
         
         for field_key, column_name in field_mapping.items():
