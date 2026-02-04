@@ -398,9 +398,10 @@ def show_page5_ipaq():
     
     st.markdown("---")
     st.markdown("### 4. 앉아서 보낸 시간")
+    st.caption("책상에 앉아 있거나, 친구를 만나거나, 독서할 때 앉거나, 텔레비전을 앉아서 또는 누워서 시청한 시간이 포함")
     
     sitting_time = st.number_input(
-        "지난 7일 동안 평일 하루에 앉아서 보낸 시간은 얼마나 됩니까? (분) 책상에 앉아 있거나, 친구를 만나거나, 독서할 때 앉거나, 텔레비전을 앉아서 또는 누워서 시청한 시간이 포함",
+        "지난 7일 동안 평일 하루에 앉아서 보낸 시간은 얼마나 됩니까? (분)",
         min_value=0,
         max_value=1440,
         value=int(data.get('sitting_time', 0)) if data.get('sitting_time') else 0,
