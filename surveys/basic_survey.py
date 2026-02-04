@@ -1319,12 +1319,21 @@ def save_basic_survey(supabase, elderly_id, surveyor_id, nursing_home_id):
         for field_key, column_name in field_mapping.items():
             if field_key in data and column_name in available_columns:
                 survey_data[column_name] = data[field_key]
-        
+
         # === 4단계: JSON 필드 처리 ===
         if 'diseases' in data and 'diseases' in available_columns:
-            survey_data['diseases'] = json.dumps(data['diseases'])
+            # ✅ 이미 문자열이면 그대로, 아니면 변환
+            if isinstance(data['diseases'], str):
+                survey_data['diseases'] = data['diseases']
+            else:
+                survey_data['diseases'] = json.dumps(data['diseases'], ensure_ascii=False)
+        
         if 'medications' in data and 'medications' in available_columns:
-            survey_data['medications'] = json.dumps(data['medications'])
+            # ✅ 이미 문자열이면 그대로, 아니면 변환
+            if isinstance(data['medications'], str):
+                survey_data['medications'] = data['medications']
+            else:
+                survey_data['medications'] = json.dumps(data['medications'], ensure_ascii=False)
         
         # # === 5단계: K-MBI 데이터 (텍스트→숫자 변환 + 정수 변환) ===
         if 'k_mbi_score' in available_columns:
