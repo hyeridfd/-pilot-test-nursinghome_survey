@@ -69,10 +69,12 @@ def show_page1():
         )
         
         age = st.number_input(
-            "2. 귀하의 연령을 작성해 주십시오(만 나이)",
-            min_value=0,
-            max_value=120,
-            value=int(data.get('age', 0)) if data.get('age') else 0,
+            "2. 귀하의 출생연도를 작성해 주십시오",
+            min_value=1900,
+            max_value=datetime.now().year,
+            value=int(data.get('age', 1950)) if data.get('age') else 1950,
+            #value=int(data.get('age', 0)) if data.get('age') else 0,
+            step=1,
             key="age"
         )
         
