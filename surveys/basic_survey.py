@@ -467,12 +467,12 @@ def show_page6_mna():
         bmi = None
     
     # === A. 식욕 감퇴 ===
-    st.markdown("### A. 지난 3개월 동안 밥맛이 없거나, 소화가 잘 안되거나, 밥고 삼키는 것이 어려워서 식사량이 줄었습니까?")
+    st.markdown("### A. 지난 3개월 동안 밥맛이 없거나, 소화가 잘 안되거나, 씹고 삼키는 것이 어려워서 식사량이 줄었습니까?")
     
     appetite_options = {
         "많이 줄었다": 0,
         "조금 줄었다": 1,
-        "변함 없다": 2
+        "변화 없다": 2
     }
     
     # 기존 값 찾기
@@ -495,7 +495,7 @@ def show_page6_mna():
         "3kg 이상 감소": 0,
         "모르겠다": 1,
         "1kg~3kg 감소": 2,
-        "변함 없다": 3
+        "변화 없다": 3
     }
     
     current_weight_score = data.get('mna_weight_change', 3)
@@ -573,7 +573,7 @@ def show_page6_mna():
     neuro_score = neuro_options[neuropsychological]
     
     # === F. BMI ===
-    st.markdown("### F. 체질량지수 → kg / (m 높이)?")
+    st.markdown("### F. 체질량지수 → kg / (m 높이)2")
     
     if bmi:
         # BMI 자동 분류
