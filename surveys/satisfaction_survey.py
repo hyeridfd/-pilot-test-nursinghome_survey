@@ -50,57 +50,94 @@ def show_page1():
     
     st.info("📝 현재 제공받는 급식에 대한 만족도를 평가해주세요.")
     
-    st.markdown("### 1. 전반적인 급식 만족도")
+    # === 1. 전반적인 급식 만족도 ===
+    st.markdown("### 1. 급식에 대해 전반적으로 얼마나 만족하십니까?")
+    
+    overall_options = {
+        "매우 불만족": 1,
+        "불만족": 2,
+        "보통": 3,
+        "만족": 4,
+        "매우 만족": 5
+    }
+    
+    current_overall = data.get('overall_satisfaction', 3)
+    current_overall_text = [k for k, v in overall_options.items() if v == current_overall][0] if current_overall in overall_options.values() else "보통"
+    
     overall_satisfaction = st.radio(
-        "급식에 대해 전반적으로 얼마나 만족하십니까?",
-        options=[
-            "1 = 매우 불만족",
-            "2 = 불만족",
-            "3 = 보통",
-            "4 = 만족",
-            "5 = 매우 만족"
-        ],
-        index=int(data.get('overall_satisfaction', 3)) - 1 if data.get('overall_satisfaction') else 2,
-        key="overall_satisfaction",
-        horizontal=True
+        "전반적 만족도",
+        options=list(overall_options.keys()),
+        index=list(overall_options.keys()).index(current_overall_text),
+        key="overall_satisfaction_radio",
+        horizontal=True,
+        label_visibility="collapsed"
     )
+    overall_score = overall_options[overall_satisfaction]
     
-    st.markdown("### 2. 급식 양의 적절성")
+    # === 2. 급식 양의 적절성 ===
+    st.markdown("### 2. 제공되는 급식의 양은 적절합니까?")
+    
+    portion_options = {
+        "매우 부족": 1,
+        "부족": 2,
+        "적당": 3,
+        "많음": 4,
+        "매우 많음": 5
+    }
+    
+    current_portion = data.get('portion_adequacy', 3)
+    current_portion_text = [k for k, v in portion_options.items() if v == current_portion][0] if current_portion in portion_options.values() else "적당"
+    
     portion_adequacy = st.radio(
-        "제공되는 급식의 양은 적절합니까?",
-        options=[
-            "1 = 매우 부족",
-            "2 = 부족",
-            "3 = 적당",
-            "4 = 많음",
-            "5 = 매우 많음"
-        ],
-        index=int(data.get('portion_adequacy', 3)) - 1 if data.get('portion_adequacy') else 2,
-        key="portion_adequacy",
-        horizontal=True
+        "양의 적절성",
+        options=list(portion_options.keys()),
+        index=list(portion_options.keys()).index(current_portion_text),
+        key="portion_adequacy_radio",
+        horizontal=True,
+        label_visibility="collapsed"
     )
+    portion_score = portion_options[portion_adequacy]
     
-    st.markdown("### 3. 급식 품질 만족도")
+    # === 3. 급식 품질 만족도 ===
+    st.markdown("### 3. 급식의 맛과 품질에 만족하십니까?")
+    
+    quality_options = {
+        "매우 불만족": 1,
+        "불만족": 2,
+        "보통": 3,
+        "만족": 4,
+        "매우 만족": 5
+    }
+    
+    current_quality = data.get('food_quality', 3)
+    current_quality_text = [k for k, v in quality_options.items() if v == current_quality][0] if current_quality in quality_options.values() else "보통"
+    
     food_quality = st.radio(
-        "급식의 맛과 품질에 만족하십니까?",
-        options=[
-            "1 = 매우 불만족",
-            "2 = 불만족",
-            "3 = 보통",
-            "4 = 만족",
-            "5 = 매우 만족"
-        ],
-        index=int(data.get('food_quality', 3)) - 1 if data.get('food_quality') else 2,
-        key="food_quality",
-        horizontal=True
+        "품질 만족도",
+        options=list(quality_options.keys()),
+        index=list(quality_options.keys()).index(current_quality_text),
+        key="food_quality_radio",
+        horizontal=True,
+        label_visibility="collapsed"
     )
+    quality_score = quality_options[food_quality]
     
     # 데이터 저장
     st.session_state.satisfaction_data.update({
-        'overall_satisfaction': int(overall_satisfaction.split('=')[0].strip()),
-        'portion_adequacy': int(portion_adequacy.split('=')[0].strip()),
-        'food_quality': int(food_quality.split('=')[0].strip())
+        'overall_satisfaction': overall_score,
+        'portion_adequacy': portion_score,
+        'food_quality': quality_score
     })
+    
+    # 선택 사항 요약 표시 (optional)
+    st.markdown("---")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("전반적 만족도", f"{overall_score}/5")
+    with col2:
+        st.metric("양의 적절성", f"{portion_score}/5")
+    with col3:
+        st.metric("품질 만족도", f"{quality_score}/5")
     
     navigation_buttons()
 
