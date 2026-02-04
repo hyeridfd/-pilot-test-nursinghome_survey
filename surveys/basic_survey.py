@@ -1311,7 +1311,9 @@ def save_basic_survey(supabase, elderly_id, surveyor_id, nursing_home_id):
             'mna_score': 'mna_score',
             # K-MBI 추가 필드 ✅ 이거 추가!
             'k_mbi_max_score': 'k_mbi_max_score',
-            'mobility_type': 'mobility_type'
+            'mobility_type': 'mobility_type',
+            'k_mbi_score': 'k_mbi_score',
+            'mmse_score': 'mmse_score'
         }
         
         for field_key, column_name in field_mapping.items():
@@ -1324,7 +1326,7 @@ def save_basic_survey(supabase, elderly_id, surveyor_id, nursing_home_id):
         if 'medications' in data and 'medications' in available_columns:
             survey_data['medications'] = json.dumps(data['medications'])
         
-        # === 5단계: K-MBI 데이터 (텍스트→숫자 변환 + 정수 변환) ===
+        # # === 5단계: K-MBI 데이터 (텍스트→숫자 변환 + 정수 변환) ===
         if 'k_mbi_score' in available_columns:
             if 'k_mbi_score' in data:
                 # ✅ 소수점을 정수로 변환 (반올림)
@@ -1343,24 +1345,24 @@ def save_basic_survey(supabase, elderly_id, surveyor_id, nursing_home_id):
         else:
             st.warning("⚠️ K-MBI 데이터는 저장되지 않았습니다. (데이터베이스 컬럼 없음)")
         
-        # === 6단계: MMSE-K 데이터 (정수 변환) ===
-        mmse_fields = [
-            'mmse_score', 'mmse_time_orientation', 'mmse_place_orientation',
-            'mmse_registration', 'mmse_attention_calculation', 'mmse_recall',
-            'mmse_naming', 'mmse_repetition', 'mmse_comprehension',
-            'mmse_reading', 'mmse_writing', 'mmse_drawing'
-        ]
+        # # === 6단계: MMSE-K 데이터 (정수 변환) ===
+        # mmse_fields = [
+        #     'mmse_score', 'mmse_time_orientation', 'mmse_place_orientation',
+        #     'mmse_registration', 'mmse_attention_calculation', 'mmse_recall',
+        #     'mmse_naming', 'mmse_repetition', 'mmse_comprehension',
+        #     'mmse_reading', 'mmse_writing', 'mmse_drawing'
+        # ]
         
-        mmse_saved = False
-        for field in mmse_fields:
-            if field in available_columns and field in data:
-                value = data[field]
-                # ✅ 정수로 변환
-                survey_data[field] = int(value) if value is not None else 0
-                mmse_saved = True
+        # mmse_saved = False
+        # for field in mmse_fields:
+        #     if field in available_columns and field in data:
+        #         value = data[field]
+        #         # ✅ 정수로 변환
+        #         survey_data[field] = int(value) if value is not None else 0
+        #         mmse_saved = True
         
-        if not mmse_saved and any(f in data for f in mmse_fields):
-            st.warning("⚠️ MMSE-K 데이터는 저장되지 않았습니다. (데이터베이스 컬럼 없음)")
+        # if not mmse_saved and any(f in data for f in mmse_fields):
+        #     st.warning("⚠️ MMSE-K 데이터는 저장되지 않았습니다. (데이터베이스 컬럼 없음)")
         
         # === 7단계: 기존 데이터 확인 ===
         existing = supabase.table('basic_survey') \
