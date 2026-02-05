@@ -12,6 +12,46 @@ from surveys.basic_survey import show_basic_survey
 from surveys.nutrition_survey import show_nutrition_survey
 from surveys.satisfaction_survey import show_satisfaction_survey
 
+#########
+st.title("🔍 Supabase Storage 테스트")
+
+# Supabase 연결
+supabase = create_client(
+    st.secrets["SUPABASE_URL"],
+    st.secrets["SUPABASE_KEY"]
+)
+
+# 파일 업로드 테스트
+uploaded_file = st.file_uploader("테스트 이미지 업로드", type=['jpg', 'jpeg', 'png'])
+
+if uploaded_file and st.button("업로드 테스트"):
+    try:
+        # 파일 읽기
+        file_bytes = uploaded_file.read()
+        st.write(f"파일 크기: {len(file_bytes)} bytes")
+        
+        # Storage에 업로드
+        file_name = f"test_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jpg"
+        
+        response = supabase.storage.from_('nutrition-photos').upload(
+            path=file_name,
+            file=file_bytes,
+            file_options={"content-type": uploaded_file.type}
+        )
+        
+        st.success(f"✅ 업로드 성공! 파일명: {file_name}")
+        
+        # URL 가져오기
+        url = supabase.storage.from_('nutrition-photos').get_public_url(file_name)
+        st.write(f"URL: {url}")
+        st.image(url)
+        
+    except Exception as e:
+        st.error(f"❌ 업로드 실패: {str(e)}")
+        import traceback
+        st.code(traceback.format_exc())
+#####
+
 KST = ZoneInfo('Asia/Seoul')
 
 def get_kst_now():
