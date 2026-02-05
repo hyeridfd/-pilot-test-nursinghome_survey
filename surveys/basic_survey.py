@@ -72,11 +72,10 @@ def show_page1():
             "2. 귀하의 출생연도를 작성해 주십시오",
             min_value=1900,
             max_value=datetime.now().year,
-            value=int(data.get('age', 1950)) if data.get('age') else 1950,
+            value=int(data.get('age', 1950)) if data.get('age', 0) >= 1900 else 1950,  # ✅ 수정!
             step=1,
             key="age"
         )
-        
         care_grade = st.selectbox(
             "3. 다음 중 귀하가 받으신 장기요양등급을 선택해 주십시오",
             options=["1등급", "2등급", "3등급", "4등급 이상"],
