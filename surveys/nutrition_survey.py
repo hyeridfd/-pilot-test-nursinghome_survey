@@ -508,13 +508,13 @@ def show_page1_meal_portions(elderly_id):
     navigation_buttons()
 
 def show_page2_plate_waste_visual(elderly_id):
-    """2페이지: 잔반량 조사 (5일) - 목측법 + 잔반량 사진"""
+    """2페이지: 잔반량 사진 - 즉시 업로드"""
     st.subheader("잔반량 조사 (5일) - 목측법")
     
     st.warning("""
     📸 **사진 촬영 필수!**
     
-    각 식사마다 **식사 후 남은 음식**을 촬영하여 업로드해주세요.
+    **사진을 선택하면 자동으로 업로드됩니다.**
     - 아침, 간식1, 점심, 간식2, 저녁 각각 1장씩 촬영
     - 잔반이 보이도록 촬영
     """)
@@ -545,7 +545,11 @@ def show_page2_plate_waste_visual(elderly_id):
     
     existing_waste = st.session_state.get('plate_waste_visual_temp', {})
     
-    # ✅ 기존 잔반량 사진 URL 불러오기 (안전하게 처리)
+    # ✅ 업로드된 잔반 사진 URL 저장 (세션)
+    if 'uploaded_waste_photos' not in st.session_state:
+        st.session_state.uploaded_waste_photos = {}
+    
+    # 기존 잔반량 사진 URL 불러오기
     existing_waste_photos = data.get('meal_waste_photos', {})
     if isinstance(existing_waste_photos, str):
         try:
@@ -555,6 +559,12 @@ def show_page2_plate_waste_visual(elderly_id):
     elif not isinstance(existing_waste_photos, dict):
         existing_waste_photos = {}
     
+    # 기존 DB 사진을 세션에 복사
+    if existing_waste_photos:
+        for key, url in existing_waste_photos.items():
+            if key not in st.session_state.uploaded_waste_photos:
+                st.session_state.uploaded_waste_photos[key] = url
+    
     plate_waste_visual = {}
     plate_waste_grams = {}
     
@@ -562,80 +572,160 @@ def show_page2_plate_waste_visual(elderly_id):
     
     def process_day_waste(day, tab):
         with tab:
-            # ✅ 사진 업로드 섹션
+            # ✅ 사진 업로드 섹션 - 즉시 업로드
             st.markdown("### 📸 잔반 사진 업로드")
             
             photo_col1, photo_col2, photo_col3, photo_col4, photo_col5 = st.columns(5)
             
+            # 아침
             with photo_col1:
                 st.write("**🌅 아침**")
-                breakfast_waste_photo = st.file_uploader(
-                    f"{day}일차 아침 잔반",
-                    type=['jpg', 'jpeg', 'png'],
-                    key=f"day{day}_breakfast_waste_photo",
-                    label_visibility="collapsed",
-                    help="식사 후 남은 음식"
-                )
-                if breakfast_waste_photo:
-                    st.image(breakfast_waste_photo, use_container_width=True)
-                elif existing_waste_photos and f'day{day}_breakfast' in existing_waste_photos:
-                    st.image(existing_waste_photos[f'day{day}_breakfast'], use_container_width=True)
+                photo_key = f'day{day}_breakfast'
+                
+                if photo_key in st.session_state.uploaded_waste_photos:
+                    st.image(st.session_state.uploaded_waste_photos[photo_key], use_container_width=True)
+                    st.success("✅ 업로드 완료")
+                else:
+                    breakfast_waste_photo = st.file_uploader(
+                        f"{day}일차 아침 잔반",
+                        type=['jpg', 'jpeg', 'png'],
+                        key=f"day{day}_breakfast_waste_photo",
+                        label_visibility="collapsed"
+                    )
+                    
+                    if breakfast_waste_photo:
+                        with st.spinner('업로드 중...'):
+                            url = upload_image_to_supabase(
+                                st.session_state.supabase,
+                                breakfast_waste_photo,
+                                elderly_id,
+                                day,
+                                'breakfast',
+                                'waste'
+                            )
+                            if url:
+                                st.session_state.uploaded_waste_photos[photo_key] = url
+                                st.rerun()
             
+            # 간식1
             with photo_col2:
                 st.write("**🍪 간식1**")
-                snack1_waste_photo = st.file_uploader(
-                    f"{day}일차 간식1 잔반",
-                    type=['jpg', 'jpeg', 'png'],
-                    key=f"day{day}_snack1_waste_photo",
-                    label_visibility="collapsed",
-                    help="식사 후 남은 음식"
-                )
-                if snack1_waste_photo:
-                    st.image(snack1_waste_photo, use_container_width=True)
-                elif existing_waste_photos and f'day{day}_snack1' in existing_waste_photos:
-                    st.image(existing_waste_photos[f'day{day}_snack1'], use_container_width=True)
+                photo_key = f'day{day}_snack1'
+                
+                if photo_key in st.session_state.uploaded_waste_photos:
+                    st.image(st.session_state.uploaded_waste_photos[photo_key], use_container_width=True)
+                    st.success("✅ 업로드 완료")
+                else:
+                    snack1_waste_photo = st.file_uploader(
+                        f"{day}일차 간식1 잔반",
+                        type=['jpg', 'jpeg', 'png'],
+                        key=f"day{day}_snack1_waste_photo",
+                        label_visibility="collapsed"
+                    )
+                    
+                    if snack1_waste_photo:
+                        with st.spinner('업로드 중...'):
+                            url = upload_image_to_supabase(
+                                st.session_state.supabase,
+                                snack1_waste_photo,
+                                elderly_id,
+                                day,
+                                'snack1',
+                                'waste'
+                            )
+                            if url:
+                                st.session_state.uploaded_waste_photos[photo_key] = url
+                                st.rerun()
             
+            # 점심
             with photo_col3:
                 st.write("**☀️ 점심**")
-                lunch_waste_photo = st.file_uploader(
-                    f"{day}일차 점심 잔반",
-                    type=['jpg', 'jpeg', 'png'],
-                    key=f"day{day}_lunch_waste_photo",
-                    label_visibility="collapsed",
-                    help="식사 후 남은 음식"
-                )
-                if lunch_waste_photo:
-                    st.image(lunch_waste_photo, use_container_width=True)
-                elif existing_waste_photos and f'day{day}_lunch' in existing_waste_photos:
-                    st.image(existing_waste_photos[f'day{day}_lunch'], use_container_width=True)
+                photo_key = f'day{day}_lunch'
+                
+                if photo_key in st.session_state.uploaded_waste_photos:
+                    st.image(st.session_state.uploaded_waste_photos[photo_key], use_container_width=True)
+                    st.success("✅ 업로드 완료")
+                else:
+                    lunch_waste_photo = st.file_uploader(
+                        f"{day}일차 점심 잔반",
+                        type=['jpg', 'jpeg', 'png'],
+                        key=f"day{day}_lunch_waste_photo",
+                        label_visibility="collapsed"
+                    )
+                    
+                    if lunch_waste_photo:
+                        with st.spinner('업로드 중...'):
+                            url = upload_image_to_supabase(
+                                st.session_state.supabase,
+                                lunch_waste_photo,
+                                elderly_id,
+                                day,
+                                'lunch',
+                                'waste'
+                            )
+                            if url:
+                                st.session_state.uploaded_waste_photos[photo_key] = url
+                                st.rerun()
             
+            # 간식2
             with photo_col4:
                 st.write("**🍪 간식2**")
-                snack2_waste_photo = st.file_uploader(
-                    f"{day}일차 간식2 잔반",
-                    type=['jpg', 'jpeg', 'png'],
-                    key=f"day{day}_snack2_waste_photo",
-                    label_visibility="collapsed",
-                    help="식사 후 남은 음식"
-                )
-                if snack2_waste_photo:
-                    st.image(snack2_waste_photo, use_container_width=True)
-                elif existing_waste_photos and f'day{day}_snack2' in existing_waste_photos:
-                    st.image(existing_waste_photos[f'day{day}_snack2'], use_container_width=True)
+                photo_key = f'day{day}_snack2'
+                
+                if photo_key in st.session_state.uploaded_waste_photos:
+                    st.image(st.session_state.uploaded_waste_photos[photo_key], use_container_width=True)
+                    st.success("✅ 업로드 완료")
+                else:
+                    snack2_waste_photo = st.file_uploader(
+                        f"{day}일차 간식2 잔반",
+                        type=['jpg', 'jpeg', 'png'],
+                        key=f"day{day}_snack2_waste_photo",
+                        label_visibility="collapsed"
+                    )
+                    
+                    if snack2_waste_photo:
+                        with st.spinner('업로드 중...'):
+                            url = upload_image_to_supabase(
+                                st.session_state.supabase,
+                                snack2_waste_photo,
+                                elderly_id,
+                                day,
+                                'snack2',
+                                'waste'
+                            )
+                            if url:
+                                st.session_state.uploaded_waste_photos[photo_key] = url
+                                st.rerun()
             
+            # 저녁
             with photo_col5:
                 st.write("**🌙 저녁**")
-                dinner_waste_photo = st.file_uploader(
-                    f"{day}일차 저녁 잔반",
-                    type=['jpg', 'jpeg', 'png'],
-                    key=f"day{day}_dinner_waste_photo",
-                    label_visibility="collapsed",
-                    help="식사 후 남은 음식"
-                )
-                if dinner_waste_photo:
-                    st.image(dinner_waste_photo, use_container_width=True)
-                elif existing_waste_photos and f'day{day}_dinner' in existing_waste_photos:
-                    st.image(existing_waste_photos[f'day{day}_dinner'], use_container_width=True)
+                photo_key = f'day{day}_dinner'
+                
+                if photo_key in st.session_state.uploaded_waste_photos:
+                    st.image(st.session_state.uploaded_waste_photos[photo_key], use_container_width=True)
+                    st.success("✅ 업로드 완료")
+                else:
+                    dinner_waste_photo = st.file_uploader(
+                        f"{day}일차 저녁 잔반",
+                        type=['jpg', 'jpeg', 'png'],
+                        key=f"day{day}_dinner_waste_photo",
+                        label_visibility="collapsed"
+                    )
+                    
+                    if dinner_waste_photo:
+                        with st.spinner('업로드 중...'):
+                            url = upload_image_to_supabase(
+                                st.session_state.supabase,
+                                dinner_waste_photo,
+                                elderly_id,
+                                day,
+                                'dinner',
+                                'waste'
+                            )
+                            if url:
+                                st.session_state.uploaded_waste_photos[photo_key] = url
+                                st.rerun()
             
             st.markdown("---")
             st.markdown("### 📝 잔반량 목측 평가")
