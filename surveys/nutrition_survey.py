@@ -249,10 +249,15 @@ def show_page1_meal_portions(elderly_id):
     if isinstance(existing_portions, str):
         existing_portions = json.loads(existing_portions) if existing_portions else {}
     
-    # 기존 제공량 사진 URL 불러오기
+    # ✅ 기존 제공량 사진 URL 불러오기 (안전하게 처리)
     existing_provision_photos = data.get('meal_provision_photos', {})
     if isinstance(existing_provision_photos, str):
-        existing_provision_photos = json.loads(existing_provision_photos) if existing_provision_photos else {}
+        try:
+            existing_provision_photos = json.loads(existing_provision_photos) if existing_provision_photos else {}
+        except:
+            existing_provision_photos = {}
+    elif not isinstance(existing_provision_photos, dict):
+        existing_provision_photos = {}
     
     meal_portions = {}
     
@@ -276,7 +281,7 @@ def show_page1_meal_portions(elderly_id):
                 )
                 if breakfast_photo:
                     st.image(breakfast_photo, use_container_width=True)
-                elif f'day{day}_breakfast' in existing_provision_photos:
+                elif existing_provision_photos and f'day{day}_breakfast' in existing_provision_photos:
                     st.image(existing_provision_photos[f'day{day}_breakfast'], use_container_width=True)
             
             with photo_col2:
@@ -290,7 +295,7 @@ def show_page1_meal_portions(elderly_id):
                 )
                 if snack1_photo:
                     st.image(snack1_photo, use_container_width=True)
-                elif f'day{day}_snack1' in existing_provision_photos:
+                elif existing_provision_photos and f'day{day}_snack1' in existing_provision_photos:
                     st.image(existing_provision_photos[f'day{day}_snack1'], use_container_width=True)
             
             with photo_col3:
@@ -304,7 +309,7 @@ def show_page1_meal_portions(elderly_id):
                 )
                 if lunch_photo:
                     st.image(lunch_photo, use_container_width=True)
-                elif f'day{day}_lunch' in existing_provision_photos:
+                elif existing_provision_photos and f'day{day}_lunch' in existing_provision_photos:
                     st.image(existing_provision_photos[f'day{day}_lunch'], use_container_width=True)
             
             with photo_col4:
@@ -318,7 +323,7 @@ def show_page1_meal_portions(elderly_id):
                 )
                 if snack2_photo:
                     st.image(snack2_photo, use_container_width=True)
-                elif f'day{day}_snack2' in existing_provision_photos:
+                elif existing_provision_photos and f'day{day}_snack2' in existing_provision_photos:
                     st.image(existing_provision_photos[f'day{day}_snack2'], use_container_width=True)
             
             with photo_col5:
@@ -332,7 +337,7 @@ def show_page1_meal_portions(elderly_id):
                 )
                 if dinner_photo:
                     st.image(dinner_photo, use_container_width=True)
-                elif f'day{day}_dinner' in existing_provision_photos:
+                elif existing_provision_photos and f'day{day}_dinner' in existing_provision_photos:
                     st.image(existing_provision_photos[f'day{day}_dinner'], use_container_width=True)
             
             st.markdown("---")
@@ -445,10 +450,15 @@ def show_page2_plate_waste_visual(elderly_id):
     
     existing_waste = st.session_state.get('plate_waste_visual_temp', {})
     
-    # 기존 잔반량 사진 URL 불러오기
+    # ✅ 기존 잔반량 사진 URL 불러오기 (안전하게 처리)
     existing_waste_photos = data.get('meal_waste_photos', {})
     if isinstance(existing_waste_photos, str):
-        existing_waste_photos = json.loads(existing_waste_photos) if existing_waste_photos else {}
+        try:
+            existing_waste_photos = json.loads(existing_waste_photos) if existing_waste_photos else {}
+        except:
+            existing_waste_photos = {}
+    elif not isinstance(existing_waste_photos, dict):
+        existing_waste_photos = {}
     
     plate_waste_visual = {}
     plate_waste_grams = {}
@@ -457,7 +467,7 @@ def show_page2_plate_waste_visual(elderly_id):
     
     def process_day_waste(day, tab):
         with tab:
-            # ✅ 사진 업로드 섹션 (5개: 아침, 간식1, 점심, 간식2, 저녁)
+            # ✅ 사진 업로드 섹션
             st.markdown("### 📸 잔반 사진 업로드")
             
             photo_col1, photo_col2, photo_col3, photo_col4, photo_col5 = st.columns(5)
@@ -473,7 +483,7 @@ def show_page2_plate_waste_visual(elderly_id):
                 )
                 if breakfast_waste_photo:
                     st.image(breakfast_waste_photo, use_container_width=True)
-                elif f'day{day}_breakfast' in existing_waste_photos:
+                elif existing_waste_photos and f'day{day}_breakfast' in existing_waste_photos:
                     st.image(existing_waste_photos[f'day{day}_breakfast'], use_container_width=True)
             
             with photo_col2:
@@ -487,7 +497,7 @@ def show_page2_plate_waste_visual(elderly_id):
                 )
                 if snack1_waste_photo:
                     st.image(snack1_waste_photo, use_container_width=True)
-                elif f'day{day}_snack1' in existing_waste_photos:
+                elif existing_waste_photos and f'day{day}_snack1' in existing_waste_photos:
                     st.image(existing_waste_photos[f'day{day}_snack1'], use_container_width=True)
             
             with photo_col3:
@@ -501,7 +511,7 @@ def show_page2_plate_waste_visual(elderly_id):
                 )
                 if lunch_waste_photo:
                     st.image(lunch_waste_photo, use_container_width=True)
-                elif f'day{day}_lunch' in existing_waste_photos:
+                elif existing_waste_photos and f'day{day}_lunch' in existing_waste_photos:
                     st.image(existing_waste_photos[f'day{day}_lunch'], use_container_width=True)
             
             with photo_col4:
@@ -515,7 +525,7 @@ def show_page2_plate_waste_visual(elderly_id):
                 )
                 if snack2_waste_photo:
                     st.image(snack2_waste_photo, use_container_width=True)
-                elif f'day{day}_snack2' in existing_waste_photos:
+                elif existing_waste_photos and f'day{day}_snack2' in existing_waste_photos:
                     st.image(existing_waste_photos[f'day{day}_snack2'], use_container_width=True)
             
             with photo_col5:
@@ -529,7 +539,7 @@ def show_page2_plate_waste_visual(elderly_id):
                 )
                 if dinner_waste_photo:
                     st.image(dinner_waste_photo, use_container_width=True)
-                elif f'day{day}_dinner' in existing_waste_photos:
+                elif existing_waste_photos and f'day{day}_dinner' in existing_waste_photos:
                     st.image(existing_waste_photos[f'day{day}_dinner'], use_container_width=True)
             
             st.markdown("---")
