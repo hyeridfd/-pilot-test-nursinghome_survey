@@ -823,11 +823,14 @@ def save_nutrition_survey(supabase, elderly_id, surveyor_id, nursing_home_id):
             del data['plate_waste_visual']
         
         # ✅ 세션에 저장된 사진 URL 사용
-        if 'uploaded_provision_photos' in st.session_state and st.session_state.uploaded_provision_photos:
-            data['meal_provision_photos'] = json.dumps(st.session_state.uploaded_provision_photos, ensure_ascii=False)
+        provision_photos = st.session_state.get('uploaded_provision_photos', {})
+        waste_photos = st.session_state.get('uploaded_waste_photos', {})
         
-        if 'uploaded_waste_photos' in st.session_state and st.session_state.uploaded_waste_photos:
-            data['meal_waste_photos'] = json.dumps(st.session_state.uploaded_waste_photos, ensure_ascii=False)
+        if provision_photos:
+            data['meal_provision_photos'] = json.dumps(provision_photos, ensure_ascii=False)
+        
+        if waste_photos:
+            data['meal_waste_photos'] = json.dumps(waste_photos, ensure_ascii=False)
         
         # 데이터베이스 저장
         data.update({
@@ -851,15 +854,21 @@ def save_nutrition_survey(supabase, elderly_id, surveyor_id, nursing_home_id):
         
         st.success("✅ 영양 조사표가 저장되었습니다!")
         
-        # 업로드된 사진 개수 표시
-        total_photos = len(provision_photo_urls) + len(waste_photo_urls)
+        # ✅ 업로드된 사진 개수 표시
+        total_photos = len(provision_photos) + len(waste_photos)
         if total_photos > 0:
             st.info(f"📸 총 {total_photos}장의 사진이 업로드되었습니다.")
         
+        # 세션 정리
         del st.session_state.nutrition_data
         del st.session_state.nutrition_page
         if 'plate_waste_visual_temp' in st.session_state:
             del st.session_state['plate_waste_visual_temp']
+        if 'uploaded_provision_photos' in st.session_state:
+            del st.session_state.uploaded_provision_photos
+        if 'uploaded_waste_photos' in st.session_state:
+            del st.session_state.uploaded_waste_photos
+        
         st.session_state.current_survey = None
         
         if st.button("대시보드로 돌아가기"):
@@ -867,6 +876,8 @@ def save_nutrition_survey(supabase, elderly_id, surveyor_id, nursing_home_id):
         
     except Exception as e:
         st.error(f"저장 중 오류가 발생했습니다: {str(e)}")
+        import traceback
+        st.error(f"상세 오류:\n```\n{traceback.format_exc()}\n```")
 
 def navigation_buttons():
     """페이지 이동 버튼"""
