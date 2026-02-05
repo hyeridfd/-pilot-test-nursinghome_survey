@@ -30,8 +30,16 @@ def upload_image_to_supabase(supabase, file, elderly_id, day, meal_type, photo_t
         file_extension = file.name.split('.')[-1] if '.' in file.name else 'jpg'
         file_name = f"{elderly_id}_{photo_type}_day{day}_{meal_type}_{timestamp}.{file_extension}"
         
+        # ✅ 파일 포인터를 처음으로 되돌리기
+        file.seek(0)
+        
         # 이미지를 바이트로 읽기
         file_bytes = file.read()
+        
+        # ✅ 파일 크기 확인
+        if len(file_bytes) == 0:
+            st.error(f"❌ 파일이 비어있습니다: {file.name}")
+            return None
         
         # Supabase Storage에 업로드
         response = supabase.storage.from_('nutrition-photos').upload(
@@ -40,14 +48,21 @@ def upload_image_to_supabase(supabase, file, elderly_id, day, meal_type, photo_t
             file_options={"content-type": file.type}
         )
         
-        # 공개 URL 생성
-        public_url = supabase.storage.from_('nutrition-photos').get_public_url(file_name)
-        return public_url
+        # ✅ 업로드 성공 확인
+        if response:
+            # 공개 URL 생성
+            public_url = supabase.storage.from_('nutrition-photos').get_public_url(file_name)
+            st.success(f"✅ 업로드 성공: {file_name}")
+            return public_url
+        else:
+            st.error(f"❌ 업로드 실패: {file_name}")
+            return None
             
     except Exception as e:
-        st.error(f"이미지 업로드 실패: {str(e)}")
+        st.error(f"❌ 이미지 업로드 실패: {str(e)}")
+        import traceback
+        st.error(traceback.format_exc())
         return None
-
 def show_nutrition_survey(supabase, elderly_id, surveyor_id, nursing_home_id):
     st.title("🥗 2. 영양 조사표")
     
