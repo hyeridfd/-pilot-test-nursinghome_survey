@@ -1350,9 +1350,7 @@ def show_page9(supabase, elderly_id, surveyor_id, nursing_home_id):
                 save_basic_survey(supabase, elderly_id, surveyor_id, nursing_home_id)
 
 def save_basic_survey(supabase, elderly_id, surveyor_id, nursing_home_id):
-    """
-    기초 조사 데이터를 Supabase에 저장
-    """
+    """기초 조사 데이터를 Supabase에 저장"""
     try:
         data = st.session_state.basic_data
         
@@ -1364,36 +1362,8 @@ def save_basic_survey(supabase, elderly_id, surveyor_id, nursing_home_id):
             "최소한의 도움이 필요하거나 감시가 필요한 경우": 3,
             "완전히 독립적인 경우": 4
         }
-
-        mmse_individual_fields = [
-            # 기억등록
-            'mmse_reg_airplane', 'mmse_reg_pencil', 'mmse_reg_pine',
-            # 시간지남력
-            'mmse_time_year', 'mmse_time_month', 'mmse_time_day', 
-            'mmse_time_weekday', 'mmse_time_season',
-            # 장소지남력
-            'mmse_place_country', 'mmse_place_city', 'mmse_place_type',
-            'mmse_place_name', 'mmse_place_floor',
-            # 기억회상
-            'mmse_recall_airplane', 'mmse_recall_pencil', 'mmse_recall_pine',
-            # 주의집중 및 계산
-            'mmse_calc_1', 'mmse_calc_2', 'mmse_calc_3', 'mmse_calc_4', 'mmse_calc_5',
-            # 언어
-            'mmse_naming', 'mmse_repetition', 'mmse_comprehension',
-            'mmse_reading', 'mmse_writing',
-            # 그리기
-            'mmse_drawing'
-        ]
-
-        for field in mmse_individual_fields:
-            if field in data and field in available_columns:
-                survey_data[field] = int(data[field]) if data[field] is not None else 0
         
-        # 총점
-        if 'mmse_score' in data and 'mmse_score' in available_columns:
-            survey_data['mmse_score'] = int(data['mmse_score'])
-        
-        # === 1단계: 테이블 스키마 조회 ===
+        # === 1단계: 테이블 스키마 조회 (먼저!) ===
         try:
             schema_check = supabase.table('basic_survey').select('*').limit(1).execute()
             available_columns = set(schema_check.data[0].keys()) if schema_check.data else set()
@@ -1413,7 +1383,22 @@ def save_basic_survey(supabase, elderly_id, surveyor_id, nursing_home_id):
                 # MNA-SF 필드
                 'mna_appetite_change', 'mna_weight_change', 'mna_mobility',
                 'mna_stress_illness', 'mna_neuropsychological_problem',
-                'mna_bmi_category', 'mna_score'
+                'mna_bmi_category', 'mna_score',
+                # K-MBI 필드
+                'k_mbi_score', 'k_mbi_max_score', 'mobility_type',
+                'kmbi_1', 'kmbi_2', 'kmbi_3', 'kmbi_4', 'kmbi_5', 'kmbi_6',
+                'kmbi_7', 'kmbi_8', 'kmbi_9', 'kmbi_10', 'kmbi_11',
+                # MMSE-K 필드
+                'mmse_score',
+                'mmse_reg_airplane', 'mmse_reg_pencil', 'mmse_reg_pine',
+                'mmse_time_year', 'mmse_time_month', 'mmse_time_day',
+                'mmse_time_weekday', 'mmse_time_season',
+                'mmse_place_country', 'mmse_place_city', 'mmse_place_type',
+                'mmse_place_name', 'mmse_place_floor',
+                'mmse_recall_airplane', 'mmse_recall_pencil', 'mmse_recall_pine',
+                'mmse_calc_1', 'mmse_calc_2', 'mmse_calc_3', 'mmse_calc_4', 'mmse_calc_5',
+                'mmse_naming', 'mmse_repetition', 'mmse_comprehension',
+                'mmse_reading', 'mmse_writing', 'mmse_drawing'
             }
         
         # === 2단계: 기본 필수 데이터 ===
@@ -1462,36 +1447,32 @@ def save_basic_survey(supabase, elderly_id, surveyor_id, nursing_home_id):
             'mna_neuropsychological_problem': 'mna_neuropsychological_problem',
             'mna_bmi_category': 'mna_bmi_category',
             'mna_score': 'mna_score',
-            # K-MBI 추가 필드 ✅ 이거 추가!
+            # K-MBI 추가 필드
             'k_mbi_max_score': 'k_mbi_max_score',
             'mobility_type': 'mobility_type',
-            'k_mbi_score': 'k_mbi_score',
-            'mmse_score': 'mmse_score'
+            'k_mbi_score': 'k_mbi_score'
         }
         
         for field_key, column_name in field_mapping.items():
             if field_key in data and column_name in available_columns:
                 survey_data[column_name] = data[field_key]
-
+        
         # === 4단계: JSON 필드 처리 ===
         if 'diseases' in data and 'diseases' in available_columns:
-            # ✅ 이미 문자열이면 그대로, 아니면 변환
             if isinstance(data['diseases'], str):
                 survey_data['diseases'] = data['diseases']
             else:
                 survey_data['diseases'] = json.dumps(data['diseases'], ensure_ascii=False)
         
         if 'medications' in data and 'medications' in available_columns:
-            # ✅ 이미 문자열이면 그대로, 아니면 변환
             if isinstance(data['medications'], str):
                 survey_data['medications'] = data['medications']
             else:
                 survey_data['medications'] = json.dumps(data['medications'], ensure_ascii=False)
         
-        # # === 5단계: K-MBI 데이터 (텍스트→숫자 변환 + 정수 변환) ===
+        # === 5단계: K-MBI 데이터 (텍스트→숫자 변환 + 정수 변환) ===
         if 'k_mbi_score' in available_columns:
             if 'k_mbi_score' in data:
-                # ✅ 소수점을 정수로 변환 (반올림)
                 survey_data['k_mbi_score'] = int(round(data['k_mbi_score']))
             
             # K-MBI 각 항목 변환 (텍스트 → 점수)
@@ -1499,32 +1480,39 @@ def save_basic_survey(supabase, elderly_id, surveyor_id, nursing_home_id):
                 col_name = f'kmbi_{i}'
                 if col_name in available_columns and col_name in data:
                     value = data[col_name]
-                    # 텍스트인 경우 점수로 변환
                     if isinstance(value, str):
                         survey_data[col_name] = kmbi_score_mapping.get(value, 0)
                     else:
                         survey_data[col_name] = int(value) if value is not None else 0
-        else:
-            st.warning("⚠️ K-MBI 데이터는 저장되지 않았습니다. (데이터베이스 컬럼 없음)")
         
-        # # === 6단계: MMSE-K 데이터 (정수 변환) ===
-        # mmse_fields = [
-        #     'mmse_score', 'mmse_time_orientation', 'mmse_place_orientation',
-        #     'mmse_registration', 'mmse_attention_calculation', 'mmse_recall',
-        #     'mmse_naming', 'mmse_repetition', 'mmse_comprehension',
-        #     'mmse_reading', 'mmse_writing', 'mmse_drawing'
-        # ]
+        # === 6단계: MMSE-K 개별 항목 저장 ===
+        mmse_individual_fields = [
+            # 기억등록
+            'mmse_reg_airplane', 'mmse_reg_pencil', 'mmse_reg_pine',
+            # 시간지남력
+            'mmse_time_year', 'mmse_time_month', 'mmse_time_day', 
+            'mmse_time_weekday', 'mmse_time_season',
+            # 장소지남력
+            'mmse_place_country', 'mmse_place_city', 'mmse_place_type',
+            'mmse_place_name', 'mmse_place_floor',
+            # 기억회상
+            'mmse_recall_airplane', 'mmse_recall_pencil', 'mmse_recall_pine',
+            # 주의집중 및 계산
+            'mmse_calc_1', 'mmse_calc_2', 'mmse_calc_3', 'mmse_calc_4', 'mmse_calc_5',
+            # 언어
+            'mmse_naming', 'mmse_repetition', 'mmse_comprehension',
+            'mmse_reading', 'mmse_writing',
+            # 그리기
+            'mmse_drawing'
+        ]
         
-        # mmse_saved = False
-        # for field in mmse_fields:
-        #     if field in available_columns and field in data:
-        #         value = data[field]
-        #         # ✅ 정수로 변환
-        #         survey_data[field] = int(value) if value is not None else 0
-        #         mmse_saved = True
+        for field in mmse_individual_fields:
+            if field in data and field in available_columns:
+                survey_data[field] = int(data[field]) if data[field] is not None else 0
         
-        # if not mmse_saved and any(f in data for f in mmse_fields):
-        #     st.warning("⚠️ MMSE-K 데이터는 저장되지 않았습니다. (데이터베이스 컬럼 없음)")
+        # 총점
+        if 'mmse_score' in data and 'mmse_score' in available_columns:
+            survey_data['mmse_score'] = int(data['mmse_score'])
         
         # === 7단계: 기존 데이터 확인 ===
         existing = supabase.table('basic_survey') \
@@ -1567,20 +1555,16 @@ def save_basic_survey(supabase, elderly_id, surveyor_id, nursing_home_id):
             col1, col2, col3 = st.columns(3)
             
             with col1:
-                # K-MBI 점수 표시
                 if 'k_mbi_score' in survey_data:
                     st.metric("K-MBI 총점", f"{survey_data['k_mbi_score']}/100점")
             
             with col2:
-                # MMSE-K 점수 표시
                 if 'mmse_score' in survey_data:
                     st.metric("MMSE-K 총점", f"{survey_data['mmse_score']}/30점")
             
             with col3:
-                # MNA-SF 점수 표시
                 if 'mna_score' in survey_data:
                     st.metric("MNA-SF 총점", f"{survey_data['mna_score']}/14점")
-        
         
         # 세션 초기화
         if 'basic_data' in st.session_state:
@@ -1597,18 +1581,12 @@ def save_basic_survey(supabase, elderly_id, surveyor_id, nursing_home_id):
         st.error(f"❌ 저장 중 오류 발생: {str(e)}")
         
         with st.expander("🔍 오류 상세 정보"):
-            st.write("**저장 시도한 데이터:**")
-            # 안전한 출력을 위해 변환
-            display_data = {}
-            for k, v in survey_data.items():
-                if isinstance(v, (list, dict)):
-                    display_data[k] = str(v)
-                else:
-                    display_data[k] = v
-            st.json(display_data)
-            
             st.write("**오류 메시지:**")
             st.code(str(e))
+            
+            import traceback
+            st.write("**전체 트레이스백:**")
+            st.code(traceback.format_exc())
 
 def navigation_buttons():
     """페이지 이동 버튼"""
