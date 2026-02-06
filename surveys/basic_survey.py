@@ -988,90 +988,216 @@ def show_page8_mmse():
     """8페이지: K-MMSE~2 (간이정신상태검사 한국판) 평가"""
     st.subheader("K-MMSE~2 (간이정신상태검사 한국판) 평가")
     
-    st.info("📝 인지기능을 평가합니다. 각 문항에 정답이면 해당 점수를 부여합니다.")
+    st.info("📝 인지기능을 평가합니다. 각 항목의 점수를 클릭하여 선택하세요.")
     
     data = st.session_state.basic_data
     
-    # MMSE-K 평가 항목 (11개 영역)
-    mmse_items = {
-        "mmse_time_orientation": {"name": "시간 지남력", "max_score": 5, "questions": [
-            "오늘은 몇 년도입니까?",
-            "몇 월입니까?",
-            "몇 일입니까?",
-            "무슨 요일입니까?",
-            "무슨 계절입니까?"
-        ]},
-        "mmse_place_orientation": {"name": "장소 지남력", "max_score": 5, "questions": [
-            "여기는 무슨 도(시/군)입니까?",
-            "여기는 무슨 시(군/구)입니까?",
-            "여기는 무슨 동(읍/면)입니까?",
-            "여기는 어디입니까? (요양원, 병원 등)",
-            "여기는 무엇을 하는 곳입니까?"
-        ]},
-        "mmse_registration": {"name": "기억등록", "max_score": 3, "questions": [
-            "세 가지 단어 즉시 따라하기 (나무, 자동차, 모자)"
-        ]},
-        "mmse_attention_calculation": {"name": "주의집중 및 계산", "max_score": 5, "questions": [
-            "100에서 7을 계속해서 빼세요 (또는 '삼천리강산'을 거꾸로)"
-        ]},
-        "mmse_recall": {"name": "기억회상", "max_score": 3, "questions": [
-            "아까 세 가지 단어가 무엇이었습니까?"
-        ]},
-        "mmse_naming": {"name": "이름 맞추기", "max_score": 2, "questions": [
-            "이것이 무엇입니까? (연필)",
-            "이것이 무엇입니까? (시계)"
-        ]},
-        "mmse_comprehension": {"name": "3단계 명령", "max_score": 3, "questions": [
-            "오른손으로 종이를 들어서 / 반으로 접어 / 무릎 위에 놓으세요"
-        ]},
-        "mmse_drawing": {"name": "도형 그리기", "max_score": 1, "questions": [
-            "오각형 2개가 겹쳐진 그림 따라 그리기"
-        ]},        
-        "mmse_repetition": {"name": "따라 말하기", "max_score": 1, "questions": [
-            "간장 공장 공장장"
-        ]},        
-        "mmse_reading": {"name": "이해", "max_score": 1, "questions": [
-            "왜 옷은 빨아서 입습니까?"
-        ]},
-        "mmse_writing": {"name": "판단", "max_score": 1, "questions": [
-            "길에서 주민등록증을 주웠을 때 어떻게 하면 쉽게 주인에게 돌려줄 수 있습니까?"
-        ]}
+    # MMSE-K 평가 항목 (사진 기준)
+    mmse_structure = [
+        {
+            "category": "기억등록",
+            "items": [
+                {"name": "비행기", "key": "mmse_reg_airplane", "scores": [0, 1]},
+                {"name": "연필", "key": "mmse_reg_pencil", "scores": [0, 1]},
+                {"name": "소나무", "key": "mmse_reg_pine", "scores": [0, 1]}
+            ]
+        },
+        {
+            "category": "시간지남력",
+            "items": [
+                {"name": "년", "key": "mmse_time_year", "scores": [0, 1]},
+                {"name": "월", "key": "mmse_time_month", "scores": [0, 1]},
+                {"name": "일", "key": "mmse_time_day", "scores": [0, 1]},
+                {"name": "요일", "key": "mmse_time_weekday", "scores": [0, 1]},
+                {"name": "계절", "key": "mmse_time_season", "scores": [0, 1]}
+            ]
+        },
+        {
+            "category": "장소지남력",
+            "items": [
+                {"name": "나라", "key": "mmse_place_country", "scores": [0, 1]},
+                {"name": "시/도", "key": "mmse_place_city", "scores": [0, 1]},
+                {"name": "특별시(광역시)/도", "key": "mmse_place_province", "scores": [0, 1]},
+                {"name": "무엇하는 곳", "key": "mmse_place_type", "scores": [0, 1]},
+                {"name": "구/시·군", "key": "mmse_place_district", "scores": [0, 1]},
+                {"name": "현재 장소명", "key": "mmse_place_name", "scores": [0, 1]},
+                {"name": "몇 층", "key": "mmse_place_floor", "scores": [0, 1]},
+                {"name": "동(도로명)/읍·면", "key": "mmse_place_dong", "scores": [0, 1]}
+            ]
+        },
+        {
+            "category": "기억회상",
+            "items": [
+                {"name": "비행기", "key": "mmse_recall_airplane", "scores": [0, 1]},
+                {"name": "연필", "key": "mmse_recall_pencil", "scores": [0, 1]},
+                {"name": "소나무", "key": "mmse_recall_pine", "scores": [0, 1]}
+            ]
+        },
+        {
+            "category": "주의집중 및 계산",
+            "items": [
+                {"name": "100 - 7", "key": "mmse_calc_1", "scores": [0, 1]},
+                {"name": "- 7", "key": "mmse_calc_2", "scores": [0, 1]},
+                {"name": "- 7", "key": "mmse_calc_3", "scores": [0, 1]},
+                {"name": "- 7", "key": "mmse_calc_4", "scores": [0, 1]},
+                {"name": "- 7", "key": "mmse_calc_5", "scores": [0, 1]}
+            ]
+        },
+        {
+            "category": "언어",
+            "subcategories": [
+                {
+                    "name": "이름대기",
+                    "items": [
+                        {"name": "눈, 귀", "key": "mmse_naming", "scores": [0, 1, 2]}
+                    ]
+                },
+                {
+                    "name": "따라 말하기",
+                    "items": [
+                        {"name": "백문이 불여일견", "key": "mmse_repetition", "scores": [0, 1]}
+                    ]
+                },
+                {
+                    "name": "이해",
+                    "items": [
+                        {"name": "동그라미를 가리키고,\n네모를 가리킨 다음, 세모를 가리키세요", "key": "mmse_comprehension", "scores": [0, 1, 2, 3]}
+                    ]
+                },
+                {
+                    "name": "읽기",
+                    "items": [
+                        {"name": "(눈을 감으세요)", "key": "mmse_reading", "scores": [0, 1]}
+                    ]
+                },
+                {
+                    "name": "쓰기",
+                    "items": [
+                        {"name": "오늘 날씨를 한 문장으로 써 보세요.", "key": "mmse_writing", "scores": [0, 1]}
+                    ]
+                }
+            ]
+        },
+        {
+            "category": "그리기",
+            "items": [
+                {"name": "오각형", "key": "mmse_drawing", "scores": [0, 1]}
+            ]
+        }
+    ]
+    
+    # 스타일 추가
+    st.markdown("""
+    <style>
+    .mmse-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
     }
+    .mmse-table th {
+        background-color: #2c3e50;
+        color: white;
+        padding: 12px;
+        text-align: center;
+        font-weight: bold;
+    }
+    .mmse-table td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: center;
+    }
+    .category-cell {
+        background-color: #ecf0f1;
+        font-weight: bold;
+        text-align: center;
+    }
+    .subcategory-cell {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        text-align: left;
+        padding-left: 20px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
     
     total_score = 0
     
-    # 각 영역별 평가
-    for key, item in mmse_items.items():
-        st.markdown(f"### {item['name']}")
-        st.caption(f"💡 최대 {item['max_score']}점")
+    # 테이블 형태로 표시
+    for section in mmse_structure:
+        st.markdown(f"### {section['category']}")
         
-        # 질문 표시
-        for question in item['questions']:
-            st.write(f"• {question}")
+        # 일반 항목 (언어 제외)
+        if 'items' in section:
+            for item in section['items']:
+                col1, col2, col3 = st.columns([3, 4, 3])
+                
+                with col1:
+                    st.write(f"**{item['name']}**")
+                
+                with col2:
+                    st.write("") # 반응 열 (비워둠)
+                
+                with col3:
+                    # 점수 버튼
+                    score_cols = st.columns(len(item['scores']))
+                    current_value = int(data.get(item['key'], 0))
+                    
+                    for idx, score in enumerate(item['scores']):
+                        with score_cols[idx]:
+                            button_type = "primary" if current_value == score else "secondary"
+                            if st.button(
+                                str(score), 
+                                key=f"{item['key']}_{score}",
+                                type=button_type,
+                                use_container_width=True
+                            ):
+                                data[item['key']] = score
+                                st.rerun()
+                    
+                    total_score += current_value
         
-        # 점수 입력
-        score_value = st.number_input(
-            f"획득 점수 (0 ~ {item['max_score']})",
-            min_value=0,
-            max_value=item['max_score'],
-            value=int(data.get(key, 0)),
-            key=key,
-            help=f"{item['name']} 영역의 점수를 입력하세요"
-        )
-        
-        # ✅ 세션에 저장
-        data[key] = score_value
-        total_score += score_value
+        # 언어 섹션 (하위 카테고리 있음)
+        elif 'subcategories' in section:
+            for subcat in section['subcategories']:
+                st.markdown(f"#### {subcat['name']}")
+                
+                for item in subcat['items']:
+                    col1, col2, col3 = st.columns([3, 4, 3])
+                    
+                    with col1:
+                        st.write(f"**{item['name']}**")
+                    
+                    with col2:
+                        st.write("") # 반응 열
+                    
+                    with col3:
+                        # 점수 버튼
+                        score_cols = st.columns(len(item['scores']))
+                        current_value = int(data.get(item['key'], 0))
+                        
+                        for idx, score in enumerate(item['scores']):
+                            with score_cols[idx]:
+                                button_type = "primary" if current_value == score else "secondary"
+                                if st.button(
+                                    str(score), 
+                                    key=f"{item['key']}_{score}",
+                                    type=button_type,
+                                    use_container_width=True
+                                ):
+                                    data[item['key']] = score
+                                    st.rerun()
+                        
+                        total_score += current_value
         
         st.markdown("---")
     
     # 총점 표시
-    st.markdown("### 📊 MMSE-K 총점")
-    col1, col2 = st.columns(2)
+    st.markdown("### 📊 K-MMSE-2: 표준형 총점")
+    
+    col1, col2 = st.columns([1, 2])
     
     with col1:
-        st.metric("총점", f"{total_score}점 / 30점", 
-                 delta=f"{total_score - 15}점" if total_score >= 15 else None)
+        st.metric("총점", f"{total_score} / 30점")
     
     with col2:
         # 교육 수준별 정상 기준
@@ -1101,8 +1227,10 @@ def show_page8_mmse():
     - 중학교 이상: ≥24점
     """)
     
-    # ✅ 총점도 세션에 저장
+    # ✅ 총점 저장
     data['mmse_score'] = total_score
+    
+    st.caption("※ 대체문항: 집/시·동-통/도·방/작·지명/소록 (대체문항에 관한 자세한 내용은 사용자 지침서를 참고하시기 바랍니다.)")
     
     navigation_buttons()
 
