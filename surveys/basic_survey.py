@@ -1364,6 +1364,34 @@ def save_basic_survey(supabase, elderly_id, surveyor_id, nursing_home_id):
             "최소한의 도움이 필요하거나 감시가 필요한 경우": 3,
             "완전히 독립적인 경우": 4
         }
+
+        mmse_individual_fields = [
+            # 기억등록
+            'mmse_reg_airplane', 'mmse_reg_pencil', 'mmse_reg_pine',
+            # 시간지남력
+            'mmse_time_year', 'mmse_time_month', 'mmse_time_day', 
+            'mmse_time_weekday', 'mmse_time_season',
+            # 장소지남력
+            'mmse_place_country', 'mmse_place_city', 'mmse_place_type',
+            'mmse_place_name', 'mmse_place_floor',
+            # 기억회상
+            'mmse_recall_airplane', 'mmse_recall_pencil', 'mmse_recall_pine',
+            # 주의집중 및 계산
+            'mmse_calc_1', 'mmse_calc_2', 'mmse_calc_3', 'mmse_calc_4', 'mmse_calc_5',
+            # 언어
+            'mmse_naming', 'mmse_repetition', 'mmse_comprehension',
+            'mmse_reading', 'mmse_writing',
+            # 그리기
+            'mmse_drawing'
+        ]
+
+        for field in mmse_individual_fields:
+            if field in data and field in available_columns:
+                survey_data[field] = int(data[field]) if data[field] is not None else 0
+        
+        # 총점
+        if 'mmse_score' in data and 'mmse_score' in available_columns:
+            survey_data['mmse_score'] = int(data['mmse_score'])
         
         # === 1단계: 테이블 스키마 조회 ===
         try:
