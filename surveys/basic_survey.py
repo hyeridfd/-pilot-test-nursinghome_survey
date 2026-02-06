@@ -1017,12 +1017,9 @@ def show_page8_mmse():
             "items": [
                 {"name": "나라", "key": "mmse_place_country", "scores": [0, 1]},
                 {"name": "시/도", "key": "mmse_place_city", "scores": [0, 1]},
-                {"name": "특별시(광역시)/도", "key": "mmse_place_province", "scores": [0, 1]},
-                {"name": "무엇하는 곳", "key": "mmse_place_type", "scores": [0, 1]},
-                {"name": "구/시·군", "key": "mmse_place_district", "scores": [0, 1]},
+                {"name": "무엇하는 곳 또는 구/시·군", "key": "mmse_place_type", "scores": [0, 1]},
                 {"name": "현재 장소명", "key": "mmse_place_name", "scores": [0, 1]},
-                {"name": "몇 층", "key": "mmse_place_floor", "scores": [0, 1]},
-                {"name": "동(도로명)/읍·면", "key": "mmse_place_dong", "scores": [0, 1]}
+                {"name": "몇 층 또는 동(도로명)/읍·면", "key": "mmse_place_floor", "scores": [0, 1]},
             ]
         },
         {
