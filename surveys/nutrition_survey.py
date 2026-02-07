@@ -290,7 +290,7 @@ def render_photo_uploader(day, meal_type, meal_label, photo_type, elderly_id):
             # 상태 표시와 삭제 버튼을 같은 줄에
             col1, col2 = st.columns([1, 1])
             with col1:
-                st.success("✅ 완료", icon="✅")
+                st.success("완료", icon="✅")
             with col2:
                 if st.button("🗑️", key=f"delete_{photo_type}_{photo_key}", use_container_width=True, help="사진 삭제"):
                     success = delete_image_from_supabase(
