@@ -269,8 +269,12 @@ def render_photo_uploader(day, meal_type, meal_label, photo_type, elderly_id):
     storage_dict_name = 'uploaded_provision_photos' if photo_type == 'provision' else 'uploaded_waste_photos'
     photo_key = f'day{day}_{meal_type}'
     
+    # ✅ 세션 딕셔너리가 없으면 생성
+    if storage_dict_name not in st.session_state:
+        st.session_state[storage_dict_name] = {}
+    
     # 이미 업로드된 사진이 있으면 표시
-    if photo_key in st.session_state.get(storage_dict_name, {}):
+    if photo_key in st.session_state[storage_dict_name]:
         photo_url = st.session_state[storage_dict_name][photo_key]
         
         # 컨테이너로 묶어서 표시
@@ -279,15 +283,19 @@ def render_photo_uploader(day, meal_type, meal_label, photo_type, elderly_id):
             
             # 삭제 버튼
             if st.button("🗑️ 삭제하고 재촬영", key=f"delete_{photo_type}_{photo_key}", use_container_width=True, type="secondary"):
-                with st.spinner('삭제 중...'):
-                    success = delete_image_from_supabase(
-                        st.session_state.supabase,
-                        photo_url,
-                        photo_key,
-                        storage_dict_name
-                    )
-                    if success:
-                        st.rerun()
+                # ✅ 즉시 세션에서 제거
+                del st.session_state[storage_dict_name][photo_key]
+                
+                # ✅ Supabase에서도 삭제 (백그라운드)
+                try:
+                    file_name = photo_url.split('/')[-1]
+                    st.session_state.supabase.storage.from_('nutrition-photos').remove([file_name])
+                except Exception as e:
+                    # 삭제 실패해도 계속 진행 (세션에서는 이미 제거됨)
+                    pass
+                
+                # ✅ 즉시 새로고침
+                st.rerun()
     else:
         # 파일 업로더
         uploaded_file = st.file_uploader(
