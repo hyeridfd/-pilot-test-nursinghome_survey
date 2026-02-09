@@ -282,7 +282,7 @@ def render_photo_uploader(day, meal_type, meal_label, photo_type, elderly_id):
             st.image(photo_url, use_container_width=True)
             
             # 삭제 버튼
-            if st.button("🗑️ 삭제하고 재촬영", key=f"delete_{photo_type}_{photo_key}", use_container_width=True, type="secondary"):
+            if st.button("🗑️ 삭제 및 재업로드", key=f"delete_{photo_type}_{photo_key}", use_container_width=True, type="secondary"):
                 # ✅ 즉시 세션에서 제거
                 del st.session_state[storage_dict_name][photo_key]
                 
