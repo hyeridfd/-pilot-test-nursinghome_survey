@@ -52,7 +52,6 @@ def upload_image_to_supabase(supabase, file, elderly_id, day, meal_type, photo_t
         if response:
             # 공개 URL 생성
             public_url = supabase.storage.from_('nutrition-photos').get_public_url(file_name)
-            st.success(f"✅ 업로드 성공: {file_name}")
             return public_url
         else:
             st.error(f"❌ 업로드 실패: {file_name}")
@@ -60,8 +59,6 @@ def upload_image_to_supabase(supabase, file, elderly_id, day, meal_type, photo_t
             
     except Exception as e:
         st.error(f"❌ 이미지 업로드 실패: {str(e)}")
-        import traceback
-        st.error(traceback.format_exc())
         return None
 
 def delete_image_from_supabase(supabase, photo_url, photo_key, storage_dict_name):
@@ -79,26 +76,20 @@ def delete_image_from_supabase(supabase, photo_url, photo_key, storage_dict_name
     """
     try:
         # URL에서 파일명 추출
-        # 예: https://.../.../nutrition-photos/파일명.jpg
         file_name = photo_url.split('/')[-1]
         
         # Supabase Storage에서 삭제
-        response = supabase.storage.from_('nutrition-photos').remove([file_name])
+        supabase.storage.from_('nutrition-photos').remove([file_name])
         
-        try:
-            supabase.storage.from_('nutrition-photos').remove([file_name])
-            # 예외가 발생하지 않으면 성공
-            st.success("✅ 사진이 삭제되었습니다")
-            return True
-        except Exception as e:
-            # 예외 발생 시에만 실패
-            st.error(f"❌ 삭제 실패: {str(e)}")
-            return False
-            
+        # ✅ 세션 스테이트에서도 제거 (이 부분이 중요!)
+        if photo_key in st.session_state.get(storage_dict_name, {}):
+            del st.session_state[storage_dict_name][photo_key]
+        
+        # 성공
+        return True
+        
     except Exception as e:
-        st.error(f"❌ 이미지 삭제 실패: {str(e)}")
-        import traceback
-        st.error(traceback.format_exc())
+        st.error(f"❌ 삭제 실패: {str(e)}")
         return False
 
 def show_nutrition_survey(supabase, elderly_id, surveyor_id, nursing_home_id):
@@ -279,19 +270,16 @@ def render_photo_uploader(day, meal_type, meal_label, photo_type, elderly_id):
     photo_key = f'day{day}_{meal_type}'
     
     # 이미 업로드된 사진이 있으면 표시
-    if photo_key in st.session_state[storage_dict_name]:
+    if photo_key in st.session_state.get(storage_dict_name, {}):
         photo_url = st.session_state[storage_dict_name][photo_key]
         
         # 컨테이너로 묶어서 표시
         with st.container():
             st.image(photo_url, use_container_width=True)
             
-            # 상태 표시와 삭제 버튼을 같은 줄에
-            col1, col2 = st.columns([1, 1])
-            with col1:
-                st.success("완료", icon="✅")
-            with col2:
-                if st.button("🗑️", key=f"delete_{photo_type}_{photo_key}", use_container_width=True, help="사진 삭제"):
+            # 삭제 버튼
+            if st.button("🗑️ 삭제하고 재촬영", key=f"delete_{photo_type}_{photo_key}", use_container_width=True, type="secondary"):
+                with st.spinner('삭제 중...'):
                     success = delete_image_from_supabase(
                         st.session_state.supabase,
                         photo_url,
