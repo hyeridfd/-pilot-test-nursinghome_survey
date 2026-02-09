@@ -78,13 +78,27 @@ def delete_image_from_supabase(supabase, photo_url, photo_key, storage_dict_name
         bool: 삭제 성공 여부
     """
     try:
-        supabase.storage.from_('nutrition-photos').remove([file_name])
-        # 예외가 발생하지 않으면 성공
-        st.success("✅ 사진이 삭제되었습니다")
-        return True
+        # URL에서 파일명 추출
+        # 예: https://.../.../nutrition-photos/파일명.jpg
+        file_name = photo_url.split('/')[-1]
+        
+        # Supabase Storage에서 삭제
+        response = supabase.storage.from_('nutrition-photos').remove([file_name])
+        
+        try:
+            supabase.storage.from_('nutrition-photos').remove([file_name])
+            # 예외가 발생하지 않으면 성공
+            st.success("✅ 사진이 삭제되었습니다")
+            return True
+        except Exception as e:
+            # 예외 발생 시에만 실패
+            st.error(f"❌ 삭제 실패: {str(e)}")
+            return False
+            
     except Exception as e:
-        # 예외 발생 시에만 실패
-        st.error(f"❌ 삭제 실패: {str(e)}")
+        st.error(f"❌ 이미지 삭제 실패: {str(e)}")
+        import traceback
+        st.error(traceback.format_exc())
         return False
 
 def show_nutrition_survey(supabase, elderly_id, surveyor_id, nursing_home_id):
