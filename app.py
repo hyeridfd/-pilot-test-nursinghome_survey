@@ -124,8 +124,12 @@ def login_page():
     
     col1, col2, col3 = st.columns(3)
     
+    # with col1:
+    #     nursing_home_id = st.text_input("요양원 ID", key="nh_id")
     with col1:
-        nursing_home_id = st.text_input("요양원 ID", key="nh_id")
+        nursing_home_id = "NH001"
+        st.text_input("요양원 ID", value="NH001", disabled=True, key="nh_id")
+    
     with col2:
         surveyor_id = st.text_input("조사원 ID", key="sv_id")
     with col3:
