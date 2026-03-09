@@ -461,8 +461,6 @@ def show_page1_meal_portions(elderly_id):
     process_day_portions(1, tab1)
     process_day_portions(2, tab2)
     process_day_portions(3, tab3)
-    process_day_portions(4, tab4)
-    process_day_portions(5, tab5)
     
     total_portions = sum(meal_portions.values())
     st.markdown("---")
@@ -652,8 +650,6 @@ def show_page2_plate_waste_visual(elderly_id):
     process_day_waste(1, tab1)
     process_day_waste(2, tab2)
     process_day_waste(3, tab3)
-    process_day_waste(4, tab4)
-    process_day_waste(5, tab5)
     
     total_waste = sum(plate_waste_grams.values())
     st.markdown("---")
