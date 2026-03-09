@@ -141,7 +141,7 @@ def login_page():
         with hc_col1:
             st.text_input("", value="HC", disabled=True, key="hc_prefix", label_visibility="collapsed")
         with hc_col2:
-            el_num = st.text_input("", placeholder="001", key="el_id", label_visibility="collapsed")
+            el_num = st.text_input("", placeholder="01", key="el_id", label_visibility="collapsed")
         elderly_id = f"HC{el_num}" if el_num else ""
     # with col3:
     #     elderly_id = st.text_input("어르신 ID", key="el_id")
