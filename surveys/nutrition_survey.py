@@ -373,7 +373,7 @@ def show_page1_meal_portions(elderly_id):
     
     meal_portions = {}
     
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(["📅 1일차", "📅 2일차", "📅 3일차", "📅 4일차", "📅 5일차"])
+    tab1, tab2, tab3 = st.tabs(["📅 1일차", "📅 2일차", "📅 3일차"])
     
     def process_day_portions(day, tab):
         with tab:
@@ -535,7 +535,7 @@ def show_page2_plate_waste_visual(elderly_id):
     plate_waste_visual = {}
     plate_waste_grams = {}
     
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(["📅 1일차", "📅 2일차", "📅 3일차", "📅 4일차", "📅 5일차"])
+    tab1, tab2, tab3 = st.tabs(["📅 1일차", "📅 2일차", "📅 3일차"])
     
     def process_day_waste(day, tab):
         with tab:
