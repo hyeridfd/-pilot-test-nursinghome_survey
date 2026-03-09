@@ -581,10 +581,10 @@ def show_page6_mna():
         if bmi < 19:
             bmi_score = 0
             bmi_text = f"BMI < 19 (현재: {bmi:.2f})"
-        elif bmi < 21:
+        elif 19<= bmi < 21:
             bmi_score = 1
             bmi_text = f"19 ≤ BMI < 21 (현재: {bmi:.2f})"
-        elif bmi < 23:
+        elif 21<= bmi < 23:
             bmi_score = 2
             bmi_text = f"21 ≤ BMI < 23 (현재: {bmi:.2f})"
         else:
