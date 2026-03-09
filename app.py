@@ -137,7 +137,7 @@ def login_page():
         
     with col3:
         st.text("어르신 ID")
-        hc_col1, hc_col2 = st.columns([1, 4])
+        hc_col1, hc_col2 = st.columns([1,1])
         with hc_col1:
             st.text_input("", value="HC", disabled=True, key="hc_prefix", label_visibility="collapsed")
         with hc_col2:
