@@ -72,7 +72,7 @@ def show_page1():
             "2. 귀하의 출생연도를 작성해 주십시오",
             min_value=1900,
             max_value=datetime.now().year,
-            value=int(data.get('age', 1950)) if data.get('age', 0) >= 1900 else 1950,  # ✅ 수정!
+            value=int(data.get('age', 1950)) if int(data.get('age', 0) or 0) >= 1900 else 1950,
             step=1,
             key="age"
         )
