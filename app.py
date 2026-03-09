@@ -136,7 +136,12 @@ def login_page():
         surveyor_id = st.selectbox("조사원 ID", options=["SRV01", "SRV02", "SRV03"], key="sv_id")
         
     with col3:
-        el_num = st.text_input("어르신 ID", placeholder="숫자만 입력 (예: 001)", key="el_id")
+        st.text("어르신 ID")
+        hc_col1, hc_col2 = st.columns([1, 4])
+        with hc_col1:
+            st.text_input("", value="HC", disabled=True, key="hc_prefix", label_visibility="collapsed")
+        with hc_col2:
+            el_num = st.text_input("", placeholder="001", key="el_id", label_visibility="collapsed")
         elderly_id = f"HC{el_num}" if el_num else ""
     # with col3:
     #     elderly_id = st.text_input("어르신 ID", key="el_id")
