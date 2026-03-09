@@ -322,7 +322,7 @@ def render_photo_uploader(day, meal_type, meal_label, photo_type, elderly_id):
 
 def show_page1_meal_portions(elderly_id):
     """1페이지: 제공량 사진 - 즉시 업로드"""
-    st.subheader("1인 분량 음식 질량 조사 (5일)")
+    st.subheader("1인 분량 음식 질량 조사 (3일)")
 
     st.warning("""
     📸 **사진 촬영 필수!**
@@ -466,7 +466,7 @@ def show_page1_meal_portions(elderly_id):
     
     total_portions = sum(meal_portions.values())
     st.markdown("---")
-    st.subheader("📊 5일간 총 제공량")
+    st.subheader("📊 3일간 총 제공량")
     st.metric("총계", f"{total_portions:.0f}g", delta=f"1일 평균 {total_portions/5:.0f}g")
     
     st.session_state.nutrition_data['meal_portions'] = json.dumps(meal_portions, ensure_ascii=False)
@@ -475,7 +475,7 @@ def show_page1_meal_portions(elderly_id):
 
 def show_page2_plate_waste_visual(elderly_id):
     """2페이지: 잔반량 사진 - 즉시 업로드"""
-    st.subheader("잔반량 조사 (5일) - 목측법")
+    st.subheader("잔반량 조사 (3일) - 목측법")
     
     st.warning("""
     📸 **사진 촬영 필수!**
@@ -657,8 +657,8 @@ def show_page2_plate_waste_visual(elderly_id):
     
     total_waste = sum(plate_waste_grams.values())
     st.markdown("---")
-    st.subheader("📊 5일간 총 잔반량")
-    st.metric("총계", f"{total_waste:.0f}g", delta=f"1일 평균 {total_waste/5:.0f}g")
+    st.subheader("📊 3일간 총 잔반량")
+    st.metric("총계", f"{total_waste:.0f}g", delta=f"1일 평균 {total_waste/3:.0f}g")
     
     if meal_portions_data:
         total_portions = sum(meal_portions_data.values())
@@ -692,7 +692,7 @@ def show_page3_submit(supabase, elderly_id, surveyor_id, nursing_home_id):
     total_intake = total_portions - total_waste
     intake_rate = (total_intake / total_portions * 100) if total_portions > 0 else 0
     
-    st.markdown("### 📊 5일간 섭취 현황")
+    st.markdown("### 📊 3일간 섭취 현황")
     
     col1, col2, col3, col4 = st.columns(4)
     
