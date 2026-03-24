@@ -413,7 +413,7 @@ def show_page1_meal_portions(elderly_id):
                 breakfast_soup = st.number_input("국/탕 (g)", min_value=0.0, max_value=1000.0, value=float(existing_portions.get(f'day{day}_breakfast_soup', 100)), step=1.0, key=f"day{day}_breakfast_soup")
                 breakfast_main = st.number_input("주찬 (g)", min_value=0.0, max_value=1000.0, value=float(existing_portions.get(f'day{day}_breakfast_main', 100)), step=1.0, key=f"day{day}_breakfast_main")
                 breakfast_side1 = st.number_input("부찬1 (g)", min_value=0.0, max_value=1000.0, value=float(existing_portions.get(f'day{day}_breakfast_side1', 100)), step=1.0, key=f"day{day}_breakfast_side1")
-                breakfast_side2 = st.number_input("부찬2 (g)", min_value=0.0, max_value=1000.0, value=float(existing_portions.get(f'day{day}_breakfast_side2', 100), step=1.0, key=f"day{day}_breakfast_side2")
+                breakfast_side2 = st.number_input("부찬2 (g)", min_value=0.0, max_value=1000.0, value=float(existing_portions.get(f'day{day}_breakfast_side2', 100)), step=1.0, key=f"day{day}_breakfast_side2")
                 breakfast_kimchi = st.number_input("김치 (g)", min_value=0.0, max_value=1000.0, value=float(existing_portions.get(f'day{day}_breakfast_kimchi', 100)), step=1.0, key=f"day{day}_breakfast_kimchi")
             
             with col2:
