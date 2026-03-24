@@ -10,47 +10,25 @@ def get_kst_now():
     return datetime.now(KST).strftime('%Y-%m-%d %H:%M:%S')
 
 def upload_image_to_supabase(supabase, file, elderly_id, day, meal_type, photo_type):
-    """
-    Supabase Storage에 이미지 업로드
-    
-    Args:
-        supabase: Supabase 클라이언트
-        file: 업로드할 파일 객체
-        elderly_id: 어르신 ID
-        day: 날짜 (1-5)
-        meal_type: 식사 종류 (breakfast, snack1, lunch, snack2, dinner)
-        photo_type: 사진 종류 (provision=제공량, waste=잔반량)
-    
-    Returns:
-        str: 업로드된 이미지의 공개 URL 또는 None
-    """
     try:
-        # 파일명 생성
         timestamp = datetime.now(KST).strftime('%Y%m%d_%H%M%S')
         file_extension = file.name.split('.')[-1] if '.' in file.name else 'jpg'
         file_name = f"{elderly_id}_{photo_type}_day{day}_{meal_type}_{timestamp}.{file_extension}"
         
-        # ✅ 파일 포인터를 처음으로 되돌리기
         file.seek(0)
-        
-        # 이미지를 바이트로 읽기
         file_bytes = file.read()
         
-        # ✅ 파일 크기 확인
         if len(file_bytes) == 0:
             st.error(f"❌ 파일이 비어있습니다: {file.name}")
             return None
         
-        # Supabase Storage에 업로드
         response = supabase.storage.from_('nutrition-photos').upload(
             file_name,
             file_bytes,
             file_options={"content-type": file.type}
         )
         
-        # ✅ 업로드 성공 확인
         if response:
-            # 공개 URL 생성
             public_url = supabase.storage.from_('nutrition-photos').get_public_url(file_name)
             return public_url
         else:
@@ -62,30 +40,13 @@ def upload_image_to_supabase(supabase, file, elderly_id, day, meal_type, photo_t
         return None
 
 def delete_image_from_supabase(supabase, photo_url, photo_key, storage_dict_name):
-    """
-    Supabase Storage에서 이미지 삭제
-    
-    Args:
-        supabase: Supabase 클라이언트
-        photo_url: 삭제할 사진의 URL
-        photo_key: 세션 스테이트 딕셔너리에서 삭제할 키
-        storage_dict_name: 세션 스테이트 딕셔너리 이름 ('uploaded_provision_photos' 또는 'uploaded_waste_photos')
-    
-    Returns:
-        bool: 삭제 성공 여부
-    """
     try:
-        # URL에서 파일명 추출
         file_name = photo_url.split('/')[-1]
-        
-        # Supabase Storage에서 삭제
         supabase.storage.from_('nutrition-photos').remove([file_name])
         
-        # ✅ 세션 스테이트에서도 제거 (이 부분이 중요!)
         if photo_key in st.session_state.get(storage_dict_name, {}):
             del st.session_state[storage_dict_name][photo_key]
         
-        # 성공
         return True
         
     except Exception as e:
@@ -95,15 +56,12 @@ def delete_image_from_supabase(supabase, photo_url, photo_key, storage_dict_name
 def show_nutrition_survey(supabase, elderly_id, surveyor_id, nursing_home_id):
     st.title("🥗 2. 영양 조사표")
     
-    # Supabase 클라이언트를 세션에 저장
     if 'supabase' not in st.session_state:
         st.session_state.supabase = supabase
     
-    # 진행 상태 초기화
     if 'nutrition_page' not in st.session_state:
         st.session_state.nutrition_page = 1
     
-    # 기존 데이터 불러오기
     if 'nutrition_data' not in st.session_state:
         try:
             response = supabase.table('nutrition_survey').select('*').eq('elderly_id', elderly_id).execute()
@@ -114,12 +72,10 @@ def show_nutrition_survey(supabase, elderly_id, surveyor_id, nursing_home_id):
         except:
             st.session_state.nutrition_data = {}
     
-    # 페이지 진행 표시
     total_pages = 3
     st.progress(st.session_state.nutrition_page / total_pages)
     st.caption(f"페이지 {st.session_state.nutrition_page} / {total_pages}")
     
-    # 페이지별 내용
     if st.session_state.nutrition_page == 1:
         show_page1_meal_portions(elderly_id)
     elif st.session_state.nutrition_page == 2:
@@ -127,7 +83,6 @@ def show_nutrition_survey(supabase, elderly_id, surveyor_id, nursing_home_id):
     elif st.session_state.nutrition_page == 3:
         show_page3_submit(supabase, elderly_id, surveyor_id, nursing_home_id)
         
-    # ✅ 업로드된 사진 URL 저장용 세션 초기화
     if 'uploaded_provision_photos' not in st.session_state:
         st.session_state.uploaded_provision_photos = {}
     if 'uploaded_waste_photos' not in st.session_state:
@@ -237,6 +192,7 @@ def create_food_waste_selector(label, key, default_value=0):
     
     radio_cols = st.columns(5)
     
+    # ✅ 세션에 없으면 default_value(DB에서 불러온 값)로 초기화
     if f"{key}_selected" not in st.session_state:
         st.session_state[f"{key}_selected"] = default_value
     
@@ -253,51 +209,31 @@ def create_food_waste_selector(label, key, default_value=0):
     return st.session_state[f"{key}_selected"]
 
 def render_photo_uploader(day, meal_type, meal_label, photo_type, elderly_id):
-    """
-    사진 업로더 렌더링 (업로드 + 삭제 기능)
-    
-    Args:
-        day: 날짜 (1-5)
-        meal_type: 식사 종류 (breakfast, snack1, lunch, snack2, dinner)
-        meal_label: 표시할 라벨 (🌅 아침, 🍪 간식1 등)
-        photo_type: provision 또는 waste
-        elderly_id: 어르신 ID
-    """
     st.write(f"**{meal_label}**")
     
-    # 세션 딕셔너리 선택
     storage_dict_name = 'uploaded_provision_photos' if photo_type == 'provision' else 'uploaded_waste_photos'
     photo_key = f'day{day}_{meal_type}'
     
-    # ✅ 세션 딕셔너리가 없으면 생성
     if storage_dict_name not in st.session_state:
         st.session_state[storage_dict_name] = {}
     
-    # 이미 업로드된 사진이 있으면 표시
     if photo_key in st.session_state[storage_dict_name]:
         photo_url = st.session_state[storage_dict_name][photo_key]
         
-        # 컨테이너로 묶어서 표시
         with st.container():
             st.image(photo_url, use_container_width=True)
             
-            # 삭제 버튼
             if st.button("🗑️ 삭제 및 재업로드", key=f"delete_{photo_type}_{photo_key}", use_container_width=True, type="secondary"):
-                # ✅ 즉시 세션에서 제거
                 del st.session_state[storage_dict_name][photo_key]
                 
-                # ✅ Supabase에서도 삭제 (백그라운드)
                 try:
                     file_name = photo_url.split('/')[-1]
                     st.session_state.supabase.storage.from_('nutrition-photos').remove([file_name])
                 except Exception as e:
-                    # 삭제 실패해도 계속 진행 (세션에서는 이미 제거됨)
                     pass
                 
-                # ✅ 즉시 새로고침
                 st.rerun()
     else:
-        # 파일 업로더
         uploaded_file = st.file_uploader(
             f"{day}일차 {meal_label}",
             type=['jpg', 'jpeg', 'png'],
@@ -306,7 +242,6 @@ def render_photo_uploader(day, meal_type, meal_label, photo_type, elderly_id):
         )
         
         if uploaded_file:
-            # 즉시 업로드
             with st.spinner('업로드 중...'):
                 url = upload_image_to_supabase(
                     st.session_state.supabase,
@@ -352,7 +287,6 @@ def show_page1_meal_portions(elderly_id):
     if isinstance(existing_portions, str):
         existing_portions = json.loads(existing_portions) if existing_portions else {}
     
-    # 업로드된 사진 URL 저장 (세션)
     if 'uploaded_provision_photos' not in st.session_state:
         st.session_state.uploaded_provision_photos = {}
     
@@ -365,7 +299,6 @@ def show_page1_meal_portions(elderly_id):
     elif not isinstance(existing_provision_photos, dict):
         existing_provision_photos = {}
     
-    # 기존 DB 사진을 세션에 복사
     if existing_provision_photos:
         for key, url in existing_provision_photos.items():
             if key not in st.session_state.uploaded_provision_photos:
@@ -381,30 +314,20 @@ def show_page1_meal_portions(elderly_id):
             
             photo_col1, photo_col2, photo_col3, photo_col4, photo_col5 = st.columns(5)
             
-            # 아침
             with photo_col1:
                 render_photo_uploader(day, 'breakfast', '🌅 아침', 'provision', elderly_id)
-            
-            # 간식1
             with photo_col2:
                 render_photo_uploader(day, 'snack1', '🍪 간식1', 'provision', elderly_id)
-            
-            # 점심
             with photo_col3:
                 render_photo_uploader(day, 'lunch', '☀️ 점심', 'provision', elderly_id)
-            
-            # 간식2
             with photo_col4:
                 render_photo_uploader(day, 'snack2', '🍪 간식2', 'provision', elderly_id)
-            
-            # 저녁
             with photo_col5:
                 render_photo_uploader(day, 'dinner', '🌙 저녁', 'provision', elderly_id)
          
             st.markdown("---")
             st.markdown("### 📝 음식 질량 입력")
             
-            # 질량 입력
             col1, col2, col3, col4, col5 = st.columns(5)
             
             with col1:
@@ -508,13 +431,25 @@ def show_page2_plate_waste_visual(elderly_id):
     if isinstance(meal_portions_data, str):
         meal_portions_data = json.loads(meal_portions_data) if meal_portions_data else {}
     
-    existing_waste = st.session_state.get('plate_waste_visual_temp', {})
+    # ✅ [수정] DB에서 저장된 목측법 선택값 불러오기
+    existing_waste_visual = data.get('plate_waste_visual', {})
+    if isinstance(existing_waste_visual, str):
+        try:
+            existing_waste = json.loads(existing_waste_visual) if existing_waste_visual else {}
+        except:
+            existing_waste = {}
+    elif isinstance(existing_waste_visual, dict):
+        existing_waste = existing_waste_visual
+    else:
+        existing_waste = {}
+    
+    # 현재 세션에서 변경한 값이 있으면 덮어쓰기 (세션 > DB 우선순위)
+    existing_waste.update(st.session_state.get('plate_waste_visual_temp', {}))
     
     # ✅ 업로드된 잔반 사진 URL 저장 (세션)
     if 'uploaded_waste_photos' not in st.session_state:
         st.session_state.uploaded_waste_photos = {}
     
-    # 기존 잔반량 사진 URL 불러오기
     existing_waste_photos = data.get('meal_waste_photos', {})
     if isinstance(existing_waste_photos, str):
         try:
@@ -524,7 +459,6 @@ def show_page2_plate_waste_visual(elderly_id):
     elif not isinstance(existing_waste_photos, dict):
         existing_waste_photos = {}
     
-    # 기존 DB 사진을 세션에 복사
     if existing_waste_photos:
         for key, url in existing_waste_photos.items():
             if key not in st.session_state.uploaded_waste_photos:
@@ -537,35 +471,24 @@ def show_page2_plate_waste_visual(elderly_id):
     
     def process_day_waste(day, tab):
         with tab:
-            # ✅ 사진 업로드 섹션 - 즉시 업로드
             st.markdown("### 📸 잔반 사진 업로드")
             
             photo_col1, photo_col2, photo_col3, photo_col4, photo_col5 = st.columns(5)
             
-            # 아침
             with photo_col1:
                 render_photo_uploader(day, 'breakfast', '🌅 아침', 'waste', elderly_id)
-            
-            # 간식1
             with photo_col2:
                 render_photo_uploader(day, 'snack1', '🍪 간식1', 'waste', elderly_id)
-            
-            # 점심
             with photo_col3:
                 render_photo_uploader(day, 'lunch', '☀️ 점심', 'waste', elderly_id)
-            
-            # 간식2
             with photo_col4:
                 render_photo_uploader(day, 'snack2', '🍪 간식2', 'waste', elderly_id)
-            
-            # 저녁
             with photo_col5:
                 render_photo_uploader(day, 'dinner', '🌙 저녁', 'waste', elderly_id)
             
             st.markdown("---")
             st.markdown("### 📝 잔반량 목측 평가")
             
-            # 아침 식사
             st.markdown("#### 🌅 아침")
             breakfast_rice_waste = create_food_waste_selector("밥/죽", f"day{day}_breakfast_rice_waste", int(existing_waste.get(f'day{day}_breakfast_rice_waste', 0)))
             breakfast_soup_waste = create_food_waste_selector("국/탕", f"day{day}_breakfast_soup_waste", int(existing_waste.get(f'day{day}_breakfast_soup_waste', 0)))
@@ -663,6 +586,10 @@ def show_page2_plate_waste_visual(elderly_id):
     
     st.session_state.nutrition_data['plate_waste'] = json.dumps(plate_waste_grams, ensure_ascii=False)
     
+    # ✅ [수정] 목측법 선택값(0~4 인덱스)을 nutrition_data에 저장 → 제출 시 DB에 반영됨
+    st.session_state.nutrition_data['plate_waste_visual'] = json.dumps(plate_waste_visual, ensure_ascii=False)
+    
+    # 세션 임시 저장도 업데이트
     if 'plate_waste_visual_temp' not in st.session_state:
         st.session_state['plate_waste_visual_temp'] = {}
     st.session_state['plate_waste_visual_temp'] = plate_waste_visual
@@ -694,13 +621,10 @@ def show_page3_submit(supabase, elderly_id, surveyor_id, nursing_home_id):
     
     with col1:
         st.metric("총 제공량", f"{total_portions:.0f}g", delta=f"1일 평균 {total_portions/5:.0f}g")
-    
     with col2:
         st.metric("총 잔반량", f"{total_waste:.0f}g", delta=f"1일 평균 {total_waste/5:.0f}g")
-    
     with col3:
         st.metric("총 섭취량", f"{total_intake:.0f}g", delta=f"1일 평균 {total_intake/5:.0f}g")
-    
     with col4:
         st.metric("평균 섭취율", f"{intake_rate:.1f}%")
     
@@ -715,7 +639,6 @@ def show_page3_submit(supabase, elderly_id, surveyor_id, nursing_home_id):
     
     st.markdown("---")
     
-    # 📸 업로드된 사진 개수 표시
     provision_photos_count = len(st.session_state.get('uploaded_provision_photos', {}))
     waste_photos_count = len(st.session_state.get('uploaded_waste_photos', {}))
     total_photos = provision_photos_count + waste_photos_count
@@ -751,10 +674,9 @@ def save_nutrition_survey(supabase, elderly_id, surveyor_id, nursing_home_id):
     try:
         data = st.session_state.nutrition_data.copy()
         
-        if 'plate_waste_visual' in data:
-            del data['plate_waste_visual']
+        # ✅ [수정] plate_waste_visual 삭제하지 않고 DB에 그대로 저장
+        # (로그아웃 후 재로그인 시 복원에 사용)
         
-        # ✅ 세션에 저장된 사진 URL 사용
         provision_photos = st.session_state.get('uploaded_provision_photos', {})
         waste_photos = st.session_state.get('uploaded_waste_photos', {})
         
@@ -764,7 +686,6 @@ def save_nutrition_survey(supabase, elderly_id, surveyor_id, nursing_home_id):
         if waste_photos:
             data['meal_waste_photos'] = json.dumps(waste_photos, ensure_ascii=False)
         
-        # 데이터베이스 저장
         data.update({
             'elderly_id': elderly_id,
             'surveyor_id': surveyor_id,
@@ -786,7 +707,6 @@ def save_nutrition_survey(supabase, elderly_id, surveyor_id, nursing_home_id):
         
         st.success("✅ 영양 조사표가 저장되었습니다!")
         
-        # ✅ 업로드된 사진 개수 표시
         total_photos = len(provision_photos) + len(waste_photos)
         if total_photos > 0:
             st.info(f"📸 총 {total_photos}장의 사진이 업로드되었습니다.")
