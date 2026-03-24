@@ -327,8 +327,9 @@ def show_page1_meal_portions(elderly_id):
          
             st.markdown("---")
             st.markdown("### 📝 음식 질량 입력")
-            
-            default_portion = 100 if not existing_portions else 0
+
+            day_has_data = f'day{day}_breakfast_rice' in existing_portions
+            default_portion = 0 if day_has_data else 100
             
             col1, col2, col3, col4, col5 = st.columns(5)
             
