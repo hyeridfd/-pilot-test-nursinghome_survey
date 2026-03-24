@@ -418,7 +418,7 @@ def show_page1_meal_portions(elderly_id):
             
             with col2:
                 st.write("**간식1**")
-                snack1 = st.number_input("간식 (g)", min_value=0.0, max_value=1000.0, value=float(existing_portions.get(f'day{day}_snack1', 0)), step=1.0, key=f"day{day}_snack1")
+                snack1 = st.number_input("간식 (g)", min_value=0.0, max_value=1000.0, value=float(existing_portions.get(f'day{day}_snack1', 100)), step=1.0, key=f"day{day}_snack1")
             
             with col3:
                 st.write("**점심**")
@@ -431,7 +431,7 @@ def show_page1_meal_portions(elderly_id):
             
             with col4:
                 st.write("**간식2**")
-                snack2 = st.number_input("간식 (g)", min_value=0.0, max_value=1000.0, value=float(existing_portions.get(f'day{day}_snack2', 0)), step=1.0, key=f"day{day}_snack2")
+                snack2 = st.number_input("간식 (g)", min_value=0.0, max_value=1000.0, value=float(existing_portions.get(f'day{day}_snack2', 100)), step=1.0, key=f"day{day}_snack2")
             
             with col5:
                 st.write("**저녁**")
