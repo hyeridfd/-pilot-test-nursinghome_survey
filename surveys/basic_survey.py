@@ -1137,7 +1137,7 @@ def show_page8_mmse():
                 with col3:
                     # 점수 버튼
                     score_cols = st.columns(len(item['scores']))
-                    current_value = int(data.get(item['key'], 0))
+                    current_value = int(data.get(item['key']) or 0)
                     
                     for idx, score in enumerate(item['scores']):
                         with score_cols[idx]:
@@ -1170,7 +1170,7 @@ def show_page8_mmse():
                     with col3:
                         # 점수 버튼
                         score_cols = st.columns(len(item['scores']))
-                        current_value = int(data.get(item['key'], 0))
+                        current_value = int(data.get(item['key']) or 0)
                         
                         for idx, score in enumerate(item['scores']):
                             with score_cols[idx]:
